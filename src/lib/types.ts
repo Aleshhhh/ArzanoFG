@@ -6,15 +6,16 @@ export interface UserPreferences {
 
 export interface AppEvent {
   id: string;
-  date: string; // ISO string
+  startDate: string; // ISO string
+  endDate: string | null; // ISO string or null for single-day events
   title: string;
   description: string;
   tags: string[];
-  photoId?: string; // Optional ID of a photo from the gallery
+  photoIds: string[]; // Array of photo IDs from the gallery
 }
 
 export interface Photo {
-  id:string;
+  id: string;
   date: string; // ISO string
   imageDataUrl: string; // Data URL
   description: string;

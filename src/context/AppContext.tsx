@@ -64,16 +64,39 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     try {
       const storedData = localStorage.getItem(APP_STORAGE_KEY);
       if (storedData) {
-        const parsedData = JSON.parse(storedData);
+        let parsedData = JSON.parse(storedData);
+
+        // --- Data Migration ---
+        // Migrate old events with 'date' to new events with 'startDate' and 'endDate'
+        if (parsedData.events && parsedData.events.some((e: any) => 'date' in e)) {
+          parsedData.events = parsedData.events.map((e: any) => {
+            if ('date' in e) {
+              const { date, photoId, ...rest } = e;
+              return {
+                ...rest,
+                startDate: date,
+                endDate: null,
+                photoIds: photoId ? [photoId] : [],
+              };
+            }
+            return e;
+          });
+        }
+        
+        // Ensure photoIds is an array
+        if (parsedData.events) {
+            parsedData.events = parsedData.events.map((e: AppEvent) => ({
+                ...e,
+                photoIds: e.photoIds || []
+            }));
+        }
+        // --- End Data Migration ---
+
         // Ensure all keys from defaultState are present
         const initialState = { ...defaultState, ...parsedData };
         if (!initialState.photos) {
             initialState.photos = [];
         }
-        if (initialState.perfectMonthsCount) {
-          delete initialState.perfectMonthsCount;
-        }
-
 
         // Apply theme immediately if a user is stored
         if (initialState.currentUser && initialState.users[initialState.currentUser]) {
@@ -93,6 +116,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isDataLoaded) {
       try {
+        // Don't save image data to localStorage to avoid size issues
         const dataToStore = {
           ...debouncedData,
           photos: debouncedData.photos.map(({ id, date, description }) => ({ id, date, description, imageDataUrl: '' })),

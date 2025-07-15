@@ -2,9 +2,9 @@
 'use client';
 
 import { useState } from 'react';
-import { format, parseISO, isSameDay } from 'date-fns';
+import { format, parseISO, isSameDay, eachDayOfInterval, startOfDay } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Calendar as CalendarIcon, PlusCircle, Image as ImageIcon, Plus, Tag, Calendar as CalendarIconComponent } from 'lucide-react';
+import { Calendar as CalendarIcon, PlusCircle, Image as ImageIcon, Plus, Tag, Calendar as CalendarIconComponent, X } from 'lucide-react';
 
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,14 +28,15 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { FileInput } from '@/components/ui/file-input';
 import { Badge } from '@/components/ui/badge';
+import type { DateRange } from 'react-day-picker';
 
 const initialEventState = {
   id: null,
-  date: new Date(),
+  dateRange: { from: new Date(), to: undefined },
   title: '',
   description: '',
   tags: '',
-  photoId: null,
+  photoIds: [],
 };
 
 export default function CalendarPage() {
@@ -46,41 +47,61 @@ export default function CalendarPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
 
   const selectedDayEvents = selectedDate
-    ? events.filter((event) => isSameDay(parseISO(event.date), selectedDate))
+    ? events.filter((event) => {
+        const start = startOfDay(parseISO(event.startDate));
+        const end = event.endDate ? startOfDay(parseISO(event.endDate)) : start;
+        const selected = startOfDay(selectedDate);
+        return selected >= start && selected <= end;
+      })
     : [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setPhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setPhotoFiles(prev => [...prev, ...files]);
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPhotoPreviews(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotoFiles(prev => prev.filter((_, i) => i !== index));
+    setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
+    if (editingEvent?.photoIds) {
+      const newPhotoIds = editingEvent.photoIds.filter((id: string, i: number) => {
+        const originalPhotosCount = editingEvent.photoIds.length - photoPreviews.filter(p => p.startsWith('data:')).length;
+        return i < originalPhotosCount || i-originalPhotosCount !== index;
+      });
+       handleFormChange('photoIds', newPhotoIds);
     }
   };
 
   const handleOpenAddDialog = () => {
-    setEditingEvent({ ...initialEventState, date: selectedDate || new Date() });
-    setPhotoFile(null);
-    setPhotoPreview(null);
+    setEditingEvent({ ...initialEventState, dateRange: { from: selectedDate || new Date(), to: undefined } });
+    setPhotoFiles([]);
+    setPhotoPreviews([]);
     setIsDialogOpen(true);
   };
   
   const handleOpenEditDialog = (event: AppEvent) => {
-    const eventPhoto = event.photoId ? photos.find(p => p.id === event.photoId) : null;
+    const eventPhotos = event.photoIds.map(id => photos.find(p => p.id === id)).filter(Boolean) as Photo[];
     setEditingEvent({
         ...event,
-        date: parseISO(event.date),
+        dateRange: { from: parseISO(event.startDate), to: event.endDate ? parseISO(event.endDate) : undefined },
         tags: event.tags.join(', ')
     });
-    setPhotoFile(null);
-    setPhotoPreview(eventPhoto?.imageDataUrl || null);
+    setPhotoFiles([]);
+    setPhotoPreviews(eventPhotos.map(p => p.imageDataUrl));
     setIsDialogOpen(true);
   }
 
@@ -89,30 +110,36 @@ export default function CalendarPage() {
   };
 
   const handleSaveEvent = () => {
-    if (!editingEvent?.title || !editingEvent?.date) return;
+    if (!editingEvent?.title || !editingEvent?.dateRange?.from) return;
 
-    let photoId: string | undefined = editingEvent.photoId;
+    let newPhotoIds: string[] = [...(editingEvent.photoIds || [])];
 
-    if (photoFile && photoPreview) {
-      const newPhoto: Photo = {
-        id: new Date().toISOString() + '-photo',
-        date: editingEvent.date.toISOString(),
-        imageDataUrl: photoPreview,
-        description: editingEvent.title,
-      };
-      addPhoto(newPhoto);
-      photoId = newPhoto.id;
+    if (photoFiles.length > 0) {
+        photoFiles.forEach((file, index) => {
+            const correspondingPreview = photoPreviews[photoPreviews.length - photoFiles.length + index];
+            if(correspondingPreview && correspondingPreview.startsWith('data:')) {
+                const newPhoto: Photo = {
+                    id: new Date().toISOString() + `-photo-${index}`,
+                    date: editingEvent.dateRange.from.toISOString(),
+                    imageDataUrl: correspondingPreview,
+                    description: editingEvent.title,
+                };
+                addPhoto(newPhoto);
+                newPhotoIds.push(newPhoto.id);
+            }
+        });
     }
 
     const tagsArray = editingEvent.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
 
     const eventToSave: AppEvent = {
       id: editingEvent.id || new Date().toISOString(),
-      date: editingEvent.date.toISOString(),
+      startDate: editingEvent.dateRange.from.toISOString(),
+      endDate: editingEvent.dateRange.to ? editingEvent.dateRange.to.toISOString() : null,
       title: editingEvent.title,
       description: editingEvent.description,
       tags: tagsArray,
-      photoId: photoId,
+      photoIds: newPhotoIds,
     };
 
     if (editingEvent.id) { // Editing existing event
@@ -120,18 +147,31 @@ export default function CalendarPage() {
         toast({ title: "Ricordo aggiornato!", description: "Le modifiche sono state salvate." });
     } else { // Adding new event
         addEvent(eventToSave);
-        if (tagsArray.includes('Insieme')) {
-            updateCheckedDays(editingEvent.date.getFullYear(), editingEvent.date.getMonth() + 1, editingEvent.date.getDate());
-            toast({ title: "Giorno 'Insieme' segnato!", description: "Questo giorno è stato spuntato sulla tua lista." });
-        } else {
-            toast({ title: "Ricordo aggiunto!", description: "Il nuovo ricordo è stato salvato." });
+        toast({ title: "Ricordo aggiunto!", description: "Il nuovo ricordo è stato salvato." });
+    }
+
+    // Update checked days for 'Insieme' tag
+    if (tagsArray.includes('Insieme')) {
+        const interval = eachDayOfInterval({
+            start: editingEvent.dateRange.from,
+            end: editingEvent.dateRange.to || editingEvent.dateRange.from,
+        });
+        interval.forEach(day => {
+            updateCheckedDays(day.getFullYear(), day.getMonth() + 1, day.getDate());
+        });
+        if (interval.length > 0) {
+            toast({ title: "Giorni 'Insieme' segnati!", description: "Questi giorni sono stati spuntati sulla tua lista." });
         }
     }
     
     setIsDialogOpen(false);
   };
   
-  const eventDays = events.map(e => parseISO(e.date));
+  const eventDays = events.flatMap(e => {
+    const start = parseISO(e.startDate);
+    const end = e.endDate ? parseISO(e.endDate) : start;
+    return eachDayOfInterval({ start, end });
+  });
 
   return (
     <>
@@ -173,13 +213,13 @@ export default function CalendarPage() {
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
               {selectedDayEvents.length > 0 ? (
                 selectedDayEvents.map((event) => {
-                  const eventPhoto = event.photoId ? photos.find(p => p.id === event.photoId) : null;
+                  const eventPhoto = event.photoIds.length > 0 ? photos.find(p => p.id === event.photoIds[0]) : null;
                   const mainTag = event.tags[0];
                   const extraTagsCount = event.tags.length - 1;
                   return (
                       <Card key={event.id} onClick={() => handleOpenEditDialog(event)} className="bg-secondary hover:bg-muted/80 transition-colors cursor-pointer group flex flex-col h-full">
                           <CardHeader className="flex-row items-center justify-between pb-2">
-                             <div className="text-sm font-semibold text-muted-foreground capitalize">{format(parseISO(event.date), 'd MMM', { locale: it })}</div>
+                             <div className="text-sm font-semibold text-muted-foreground capitalize">{format(parseISO(event.startDate), 'd MMM', { locale: it })}</div>
                              {mainTag && (
                                 <div className="flex items-center gap-1">
                                     <Badge variant="outline" className="border-primary/50 bg-primary/20 text-primary-foreground">{mainTag}</Badge>
@@ -240,23 +280,38 @@ export default function CalendarPage() {
                                 variant={"outline"}
                                 className={cn(
                                     "w-full justify-start text-left font-normal",
-                                    !editingEvent.date && "text-muted-foreground"
+                                    !editingEvent.dateRange?.from && "text-muted-foreground"
                                 )}
                                 >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {editingEvent.date ? format(editingEvent.date, "PPP", { locale: it }) : <span>Scegli una data</span>}
+                                {editingEvent.dateRange?.from ? (
+                                    editingEvent.dateRange.to ? (
+                                    <>
+                                        {format(editingEvent.dateRange.from, "LLL dd, y", { locale: it })} -{' '}
+                                        {format(editingEvent.dateRange.to, "LLL dd, y", { locale: it })}
+                                    </>
+                                    ) : (
+                                    format(editingEvent.dateRange.from, "LLL dd, y", { locale: it })
+                                    )
+                                ) : (
+                                    <span>Scegli una data</span>
+                                )}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
-                                    mode="single"
-                                    selected={editingEvent.date}
-                                    onSelect={(date) => {
-                                        handleFormChange('date', date)
-                                        setIsDatePopoverOpen(false)
+                                    mode="range"
+                                    selected={editingEvent.dateRange}
+                                    onSelect={(range) => {
+                                        handleFormChange('dateRange', range)
+                                        // Non chiudere subito se si seleziona solo la data di inizio
+                                        if(range?.from && range?.to) {
+                                            setIsDatePopoverOpen(false)
+                                        }
                                     }}
                                     initialFocus
                                     locale={it}
+                                    numberOfMonths={1}
                                 />
                             </PopoverContent>
                         </Popover>
@@ -271,31 +326,27 @@ export default function CalendarPage() {
                         <p className="text-xs text-muted-foreground">Usa 'Insieme' per segnare i giorni sul tracciatore.</p>
                     </div>
                     <div className="space-y-2">
-                        <Label>Allega una foto</Label>
-                        {photoPreview ? (
-                            <div className="relative w-full h-40 mt-2 rounded-md overflow-hidden border">
-                                <Image src={photoPreview} alt="Anteprima" layout="fill" objectFit="contain" />
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    className="absolute top-2 right-2"
-                                    onClick={() => {
-                                        setPhotoFile(null);
-                                        setPhotoPreview(null);
-                                        if (editingEvent?.photoId) {
-                                            handleFormChange('photoId', undefined);
-                                        }
-                                    }}
-                                >
-                                    Rimuovi
-                                </Button>
-                            </div>
-                        ) : (
-                            <FileInput
-                                accept="image/*"
-                                onFileChange={handleFileChange}
-                            />
-                        )}
+                        <Label>Allega foto</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {photoPreviews.map((preview, index) => (
+                                <div key={index} className="relative w-full h-24 rounded-md overflow-hidden border group">
+                                    <Image src={preview} alt={`Anteprima ${index + 1}`} layout="fill" objectFit="cover" />
+                                    <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => removePhoto(index)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                        <FileInput
+                            accept="image/*"
+                            onFileChange={handleFileChange}
+                            multiple
+                        />
                     </div>
                 </div>
             )}
