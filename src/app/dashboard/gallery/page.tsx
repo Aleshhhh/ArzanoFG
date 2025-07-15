@@ -68,7 +68,9 @@ export default function GalleryPage() {
     });
   };
   
-  const sortedPhotos = [...photos].sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+  const sortedPhotos = [...photos]
+    .filter(p => p.imageDataUrl) // Filtra le foto con imageDataUrl valido
+    .sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
 
   return (
     <div className="space-y-8">
