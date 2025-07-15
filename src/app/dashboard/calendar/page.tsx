@@ -98,6 +98,7 @@ export default function CalendarPage() {
         // This is a bit of a hack, but we find the corresponding file to remove
         const fileReader = new FileReader();
         return new Promise(resolve => {
+            const reader = new FileReader();
             reader.onloadend = () => {
                 resolve(reader.result === previewToRemove);
             };
