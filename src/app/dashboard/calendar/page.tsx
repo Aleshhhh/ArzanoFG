@@ -228,7 +228,7 @@ export default function CalendarPage() {
                   event: {
                       border: "2px solid hsl(var(--primary))",
                       color: "hsl(var(--primary-foreground))",
-                      backgroundColor: "hsl(var(--primary) / 0.2)"
+                      backgroundColor: "hsl(var(--primary) / 0.5)"
                   }
               }}
             />
@@ -405,5 +405,7 @@ export default function CalendarPage() {
     </>
   );
 }
+
+    
 
     
