@@ -18,6 +18,7 @@ interface AppContextType extends AppData {
   setCurrentUser: (user: UserProfile | null) => void;
   setTheme: (theme: 'light' | 'dark') => void;
   addEvent: (event: AppEvent) => void;
+  updateEvent: (event: AppEvent) => void;
   addPhoto: (photo: Photo) => void;
   updateCheckedDays: (year: number, month: number, day: number) => void;
   incrementPerfectMonths: () => void;
@@ -85,6 +86,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const addEvent = (event: AppEvent) => {
     setData(prev => ({ ...prev, events: [...prev.events, event] }));
   };
+  
+  const updateEvent = (updatedEvent: AppEvent) => {
+    setData(prev => ({
+        ...prev,
+        events: prev.events.map(event => event.id === updatedEvent.id ? updatedEvent : event)
+    }));
+  };
 
   const addPhoto = (photo: Photo) => {
     setData(prev => ({ ...prev, photos: [...prev.photos, photo] }));
@@ -111,7 +119,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AppContext.Provider value={{ ...data, setCurrentUser, setTheme, addEvent, addPhoto, updateCheckedDays, incrementPerfectMonths, isDataLoaded }}>
+    <AppContext.Provider value={{ ...data, setCurrentUser, setTheme, addEvent, updateEvent, addPhoto, updateCheckedDays, incrementPerfectMonths, isDataLoaded }}>
       {children}
     </AppContext.Provider>
   );
