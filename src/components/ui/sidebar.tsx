@@ -187,6 +187,7 @@ export const SidebarLink = ({
       className={cn(
         "flex items-center justify-start gap-4 group/sidebar transition-colors duration-200 rounded-lg h-14 relative",
         !isSelected && "hover:bg-secondary/50",
+        className
       )}
       {...props}
     >
@@ -194,7 +195,7 @@ export const SidebarLink = ({
         {isSelected && (
           <motion.div
             className="absolute left-0 top-0 h-full bg-secondary rounded-lg z-0"
-            initial={{ width: open ? '100%' : '56px' }}
+            initial={false}
             animate={{
               width: open ? '100%' : '56px',
             }}
