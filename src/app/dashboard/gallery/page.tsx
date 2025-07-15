@@ -26,14 +26,14 @@ import { FileInput } from '@/components/ui/file-input';
 
 export default function GalleryPage() {
   const { photos, addPhoto } = useAppContext();
-  const [newPhoto, setNewPhoto] = useState({ description: '', file: null as File | null });
+  const [newPhoto, setNewPhoto] = useState<{ description: string; file: File | null }>({ description: '', file: null });
   const [preview, setPreview] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setNewPhoto({ ...newPhoto, file });
+      setNewPhoto(prev => ({ ...prev, file }));
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -88,7 +88,7 @@ export default function GalleryPage() {
               <PlusCircle className="mr-2 h-4 w-4" /> Aggiungi Foto
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg bg-card/80 backdrop-blur-lg">
+          <DialogContent className="bg-card/80 backdrop-blur-lg">
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl">Aggiungi una nuova foto</DialogTitle>
             </DialogHeader>
@@ -97,11 +97,6 @@ export default function GalleryPage() {
                 <Label htmlFor="photo-file">Foto</Label>
                 <FileInput id="photo-file" accept="image/*" onFileChange={handleFileChange} />
               </div>
-              {preview && (
-                 <div className="relative w-full h-48 mt-2 rounded-md overflow-hidden border">
-                    <Image src={preview} alt="Anteprima" layout="fill" objectFit="contain" />
-                 </div>
-              )}
               <div className="space-y-2">
                 <Label htmlFor="description">Descrizione</Label>
                 <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
