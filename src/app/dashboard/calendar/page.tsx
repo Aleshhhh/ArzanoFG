@@ -90,29 +90,40 @@ export default function CalendarPage() {
   };
 
   const removePhoto = (index: number) => {
-    // This logic handles removing both existing (by URL) and newly added (by File object) photos
     const previewToRemove = photoPreviews[index];
-
+    const newPreviews = photoPreviews.filter((_, i) => i !== index);
+    
     if (previewToRemove.startsWith('data:')) {
-      // It's a new file, remove from files and previews
-      const fileIndex = photoPreviews.slice(0, index).filter(p => p.startsWith('data:')).length;
-      setPhotoFiles(prev => prev.filter((_, i) => i !== fileIndex));
-    } else {
-      // It's an existing photo, we need to update photoIds in editingEvent
-      if (editingEvent) {
-          const photoToRemove = photos.find(p => p.imageDataUrl === previewToRemove);
-          if (photoToRemove) {
-             const newPhotoIds = editingEvent.photoIds.filter(id => id !== photoToRemove.id);
-             handleFormChange('photoIds', newPhotoIds);
-          }
+      const fileIndexToRemove = photoFiles.findIndex(file => {
+        // This is a bit of a hack, but we find the corresponding file to remove
+        const fileReader = new FileReader();
+        return new Promise(resolve => {
+            reader.onloadend = () => {
+                resolve(reader.result === previewToRemove);
+            };
+            reader.readAsDataURL(file);
+        });
+      });
+      if (fileIndexToRemove !== -1) {
+          const newPhotoFiles = photoFiles.filter((_, i) => i !== fileIndexToRemove);
+          setPhotoFiles(newPhotoFiles);
+      }
+    } else if (editingEvent) {
+      const photoToRemove = photos.find(p => p.imageDataUrl === previewToRemove);
+      if (photoToRemove) {
+        handleFormChange('photoIds', editingEvent.photoIds.filter(id => id !== photoToRemove.id));
       }
     }
-    setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
+    setPhotoPreviews(newPreviews);
   };
 
 
   const handleOpenAddDialog = () => {
-    setEditingEvent({ ...initialEventState, dateRange: { from: selectedDate || new Date(), to: undefined } });
+    const fromDate = selectedDate || new Date();
+    setEditingEvent({ 
+      ...initialEventState, 
+      dateRange: { from: fromDate, to: undefined } 
+    });
     setPhotoFiles([]);
     setPhotoPreviews([]);
     setIsDialogOpen(true);
@@ -135,8 +146,8 @@ export default function CalendarPage() {
   };
   
   const handleDateRangeSelect = (range: DateRange | undefined) => {
-    if (range) {
-      handleFormChange('dateRange', range);
+    if (range && editingEvent) {
+      setEditingEvent({ ...editingEvent, dateRange: range });
     }
   };
 
@@ -167,19 +178,10 @@ export default function CalendarPage() {
       newPhotoIds.push(...uploadedPhotoIds);
     }
     
-    // Filter out removed photos
-    const finalPhotoIds = newPhotoIds.filter(id => {
-        const photo = photos.find(p => p.id === id);
-        return photo && photoPreviews.includes(photo.imageDataUrl);
-    });
-    
-    // Add back the new ones that were just uploaded
-    const newlyAddedPreviews = photoPreviews.filter(p => p.startsWith('data:'));
-    if(newlyAddedPreviews.length > 0 && photoFiles.length > 0) {
-        // This is tricky, we need to map the new photos back. Assuming order is preserved.
-        const newPhotoObjects = photos.slice(-photoFiles.length);
-        finalPhotoIds.push(...newPhotoObjects.map(p => p.id));
-    }
+    // Combine existing and new photo IDs, filtering by what's left in the previews
+    const finalPhotoIds = photos
+      .filter(p => photoPreviews.includes(p.imageDataUrl))
+      .map(p => p.id);
 
 
     const tagsArray = editingEvent.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
