@@ -10,6 +10,7 @@ export interface AppEvent {
   title: string;
   description: string;
   tags: string[];
+  photoId?: string; // Optional ID of a photo from the gallery
 }
 
 export interface Photo {

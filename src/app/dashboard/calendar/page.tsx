@@ -19,16 +19,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAppContext } from '@/context/AppContext';
-import { AppEvent } from '@/lib/types';
-import { PlusCircle } from 'lucide-react';
+import { AppEvent, Photo } from '@/lib/types';
+import { PlusCircle, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 export default function CalendarPage() {
-  const { events, addEvent, updateCheckedDays } = useAppContext();
+  const { events, photos, addEvent, addPhoto, updateCheckedDays } = useAppContext();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
 
   const [newEvent, setNewEvent] = useState({ title: '', description: '', tags: '' });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const selectedDayEvents = date
     ? events.filter(
@@ -36,8 +39,40 @@ export default function CalendarPage() {
       )
     : [];
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const resetForm = () => {
+    setNewEvent({ title: '', description: '', tags: '' });
+    setPhotoFile(null);
+    setPhotoPreview(null);
+  }
+
   const handleAddEvent = () => {
     if (!newEvent.title || !date) return;
+    
+    let photoId: string | undefined = undefined;
+
+    // If a photo is attached, create a new photo entry first
+    if (photoFile && photoPreview) {
+      const newPhoto: Photo = {
+        id: new Date().toISOString() + '-photo',
+        date: date.toISOString(),
+        imageDataUrl: photoPreview,
+        description: newEvent.title, // Use event title as photo description
+      };
+      addPhoto(newPhoto);
+      photoId = newPhoto.id;
+    }
 
     const tagsArray = newEvent.tags.split(',').map((tag) => tag.trim()).filter(Boolean);
 
@@ -47,6 +82,7 @@ export default function CalendarPage() {
       title: newEvent.title,
       description: newEvent.description,
       tags: tagsArray,
+      photoId: photoId,
     };
     addEvent(event);
 
@@ -56,9 +92,14 @@ export default function CalendarPage() {
             title: "Giorno 'Insieme' segnato!",
             description: "Questo giorno è stato spuntato sulla tua lista di traguardi mensili."
         });
+    } else {
+        toast({
+            title: "Ricordo aggiunto!",
+            description: "Il tuo nuovo ricordo è stato salvato nel calendario."
+        });
     }
 
-    setNewEvent({ title: '', description: '', tags: '' });
+    resetForm();
   };
   
   const eventDays = events.map(e => parseISO(e.date));
@@ -95,26 +136,36 @@ export default function CalendarPage() {
         <Card className="lg:col-span-1 bg-card/50 backdrop-blur-lg">
           <CardHeader>
             <CardTitle className="font-headline text-2xl capitalize">
-              {date ? format(date, 'MMMM d, yyyy', { locale: it }) : 'Seleziona una data'}
+              {date ? format(date, 'd MMMM yyyy', { locale: it }) : 'Seleziona una data'}
             </CardTitle>
             <CardDescription>Eventi di questo giorno</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedDayEvents.length > 0 ? (
-              selectedDayEvents.map((event) => (
-                <div key={event.id} className="p-3 bg-secondary rounded-lg">
-                  <h3 className="font-semibold">{event.title}</h3>
-                  <p className="text-sm text-muted-foreground">{event.description}</p>
-                  {event.tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">
-                      {event.tags.map(tag => <span key={tag} className="text-xs bg-primary/50 text-primary-foreground px-2 py-0.5 rounded-full">{tag}</span>)}
-                  </div>}
-                </div>
-              ))
+              selectedDayEvents.map((event) => {
+                const eventPhoto = event.photoId ? photos.find(p => p.id === event.photoId) : null;
+                return (
+                    <div key={event.id} className="p-3 bg-secondary rounded-lg space-y-2">
+                        {eventPhoto && (
+                            <div className="relative aspect-video w-full rounded-md overflow-hidden">
+                                <Image src={eventPhoto.imageDataUrl} alt={event.title} layout="fill" objectFit="cover" />
+                            </div>
+                        )}
+                        <div>
+                            <h3 className="font-semibold">{event.title}</h3>
+                            <p className="text-sm text-muted-foreground">{event.description}</p>
+                            {event.tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">
+                                {event.tags.map(tag => <span key={tag} className="text-xs bg-primary/50 text-primary-foreground px-2 py-0.5 rounded-full">{tag}</span>)}
+                            </div>}
+                        </div>
+                    </div>
+                )
+              })
             ) : (
               <p className="text-muted-foreground italic">Nessun ricordo per questo giorno.</p>
             )}
 
-            <Dialog>
+            <Dialog onOpenChange={(isOpen) => !isOpen && resetForm()}>
               <DialogTrigger asChild>
                 <Button className="w-full mt-4">
                   <PlusCircle className="mr-2 h-4 w-4" /> Aggiungi Ricordo
@@ -124,20 +175,29 @@ export default function CalendarPage() {
                 <DialogHeader>
                   <DialogTitle className="font-headline">Aggiungi un nuovo ricordo</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="title" className="text-right">Titolo</Label>
-                    <Input id="title" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} className="col-span-3" />
+                <div className="grid gap-6 py-4">
+                   <div className="space-y-2">
+                    <Label htmlFor="title">Titolo</Label>
+                    <Input id="title" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="description" className="text-right">Descrizione</Label>
-                    <Textarea id="description" value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} className="col-span-3" />
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Descrizione</Label>
+                    <Textarea id="description" value={newEvent.description} onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })} />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="tags" className="text-right">Tags</Label>
-                    <Input id="tags" value={newEvent.tags} onChange={(e) => setNewEvent({ ...newEvent, tags: e.target.value })} className="col-span-3" placeholder="Insieme, Speciale, Divertente" />
+                  <div className="space-y-2">
+                    <Label htmlFor="tags">Tags</Label>
+                    <Input id="tags" value={newEvent.tags} onChange={(e) => setNewEvent({ ...newEvent, tags: e.target.value })} placeholder="Insieme, Speciale, Divertente" />
+                    <p className="text-xs text-muted-foreground">Usa il tag 'Insieme' per segnare i giorni sul tracciatore di traguardi mensili.</p>
                   </div>
-                  <p className="text-xs text-muted-foreground text-center col-span-4 px-4">Usa il tag 'Insieme' per segnare i giorni sul tracciatore di traguardi mensili.</p>
+                   <div className="space-y-2">
+                    <Label htmlFor="photo-file">Allega una foto (opzionale)</Label>
+                    <Input id="photo-file" type="file" accept="image/*" onChange={handleFileChange} />
+                  </div>
+                  {photoPreview && (
+                    <div className="relative w-full h-40 mt-2 rounded-md overflow-hidden border">
+                        <Image src={photoPreview} alt="Anteprima" layout="fill" objectFit="contain" />
+                    </div>
+                  )}
                 </div>
                 <DialogFooter>
                   <DialogClose asChild>
