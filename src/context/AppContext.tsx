@@ -73,6 +73,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (!initialState.photos) {
             initialState.photos = [];
         }
+
+        // Apply theme immediately if a user is stored
+        if (initialState.currentUser && initialState.users[initialState.currentUser]) {
+          const theme = initialState.users[initialState.currentUser].theme;
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+        }
+
         setData(initialState);
       }
     } catch (error) {
@@ -113,13 +120,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const setTheme = (theme: 'light' | 'dark') => {
     if (data.currentUser) {
-      setData(prev => ({
-        ...prev,
-        users: {
-          ...prev.users,
-          [prev.currentUser!]: { theme },
-        },
-      }));
+      setData(prev => {
+        // Immediately update the DOM for instant feedback
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        return {
+          ...prev,
+          users: {
+            ...prev.users,
+            [prev.currentUser!]: { theme },
+          },
+        };
+      });
     }
   };
 
