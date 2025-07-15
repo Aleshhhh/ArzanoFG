@@ -33,7 +33,6 @@ const navItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, isDataLoaded, setCurrentUser } = useAppContext();
   const router = useRouter();
-  const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -41,10 +40,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   useEffect(() => {
-    if (isDataLoaded && !currentUser) {
+    if (isClient && isDataLoaded && !currentUser) {
       router.replace('/');
     }
-  }, [currentUser, isDataLoaded, router]);
+  }, [currentUser, isDataLoaded, router, isClient]);
 
   if (!isClient || !isDataLoaded || !currentUser) {
     return (
