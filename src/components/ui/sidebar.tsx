@@ -179,7 +179,7 @@ export const SidebarLink = ({
     >
       <div className={cn(
         "p-3 rounded-lg flex items-center justify-center transition-colors duration-200",
-        className.includes('bg-secondary') ? "bg-secondary" : "hover:bg-secondary"
+        className && className.includes('bg-secondary') ? "bg-secondary" : "hover:bg-secondary"
       )}>
         {link.icon}
       </div>
