@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,7 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAppContext } from '@/context/AppContext';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Heart, Calendar, Image as ImageIcon, Trophy, Sparkles, LogOut, User } from 'lucide-react';
@@ -33,6 +34,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { currentUser, isDataLoaded, setCurrentUser } = useAppContext();
   const router = useRouter();
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (isDataLoaded && !currentUser) {
@@ -40,7 +46,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [currentUser, isDataLoaded, router]);
 
-  if (!isDataLoaded || !currentUser) {
+  if (!isClient || !isDataLoaded || !currentUser) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="w-20 h-20 border-8 border-t-primary border-muted rounded-full animate-spin"></div>
