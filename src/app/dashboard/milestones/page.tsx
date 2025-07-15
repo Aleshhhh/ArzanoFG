@@ -27,7 +27,6 @@ export default function MilestonesPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    setIsClient(true);
     const now = new Date();
     
     const years = differenceInYears(now, START_DATE);
@@ -38,6 +37,7 @@ export default function MilestonesPage() {
     }
     
     setTimeTogether({ years, months: totalMonths });
+    setIsClient(true);
   }, []);
 
   const today = new Date();
@@ -66,7 +66,7 @@ export default function MilestonesPage() {
   if (!isClient) {
     return (
         <div className="flex h-screen items-center justify-center">
-            <div className="w-20 h-20 border-8 border-t-primary border-muted rounded-full animate-spin"></div>
+            <div className="w-20 h-20 border-8 border-t-primary border-secondary rounded-full animate-spin"></div>
         </div>
     );
   }
