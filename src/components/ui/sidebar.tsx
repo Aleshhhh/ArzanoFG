@@ -1,3 +1,4 @@
+
 "use client";
 import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext } from "react";
@@ -172,29 +173,32 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-4 group/sidebar",
-         className
+        "flex items-center justify-start gap-2 group/sidebar",
+        className
       )}
       {...props}
     >
       <div className={cn(
-        "p-3 rounded-lg flex items-center justify-center transition-colors duration-200",
+        "p-3 rounded-lg flex items-center justify-center transition-colors duration-200 w-full",
         className && className.includes('bg-secondary') ? "bg-secondary" : "hover:bg-secondary"
       )}>
-        {link.icon}
+        <div className="w-6 flex items-center justify-center">
+            {link.icon}
+        </div>
+        <motion.span
+            animate={{
+            opacity: open ? 1 : 0,
+            width: open ? "auto" : 0,
+            marginLeft: open ? "0.5rem" : "0",
+            }}
+            transition={{
+            duration: 0.15,
+            }}
+            className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block overflow-hidden"
+        >
+            {link.label}
+        </motion.span>
       </div>
-      <motion.span
-        animate={{
-          opacity: open ? 1 : 0,
-          width: open ? "auto" : 0,
-        }}
-        transition={{
-          duration: 0.15,
-        }}
-        className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block overflow-hidden"
-      >
-        {link.label}
-      </motion.span>
     </Link>
   );
 };
