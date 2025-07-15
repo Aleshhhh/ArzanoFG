@@ -172,13 +172,15 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-4 hover:bg-secondary rounded-lg group/sidebar",
-        !open && "justify-center",
+        "flex items-center justify-start gap-4 group/sidebar",
          className
       )}
       {...props}
     >
-      <div className={cn("p-3 flex items-center justify-center", !open ? "w-full" : "")}>
+      <div className={cn(
+        "p-3 rounded-lg flex items-center justify-center transition-colors duration-200",
+        className.includes('bg-secondary') ? "bg-secondary" : "hover:bg-secondary"
+      )}>
         {link.icon}
       </div>
       <motion.span
@@ -189,7 +191,7 @@ export const SidebarLink = ({
         transition={{
           duration: 0.15,
         }}
-        className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0 overflow-hidden"
+        className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block overflow-hidden"
       >
         {link.label}
       </motion.span>
