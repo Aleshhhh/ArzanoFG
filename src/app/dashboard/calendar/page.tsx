@@ -29,6 +29,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { FileInput } from '@/components/ui/file-input';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type EditingEventState = {
   id: string | null;
@@ -301,7 +302,7 @@ export default function CalendarPage() {
                 <DialogTitle className="font-headline text-2xl">{editingEvent?.id ? 'Modifica ricordo' : 'Aggiungi un nuovo ricordo'}</DialogTitle>
             </DialogHeader>
             {editingEvent && (
-                <div className="py-6 max-h-[70vh] overflow-y-auto">
+                <ScrollArea className="max-h-[70vh] -mx-6 px-6 py-6">
                     <div className="grid gap-6 pr-4">
                         <div className="space-y-2">
                             <Label htmlFor="title">Titolo</Label>
@@ -391,7 +392,7 @@ export default function CalendarPage() {
                             />
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
             )}
             <DialogFooter>
                 <DialogClose asChild>
