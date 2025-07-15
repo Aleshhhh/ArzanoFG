@@ -5,7 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useRouter, usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, Calendar, Image as ImageIcon, Trophy, Sparkles, LogOut, User } from 'lucide-react';
+import { Heart, Calendar, Image as ImageIcon, Trophy, Sparkles, LogOut, User, Moon, Sun } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { Sidebar, SidebarBody, SidebarLink, Logo, LogoIcon } from '@/components/ui/sidebar';
 import Link from 'next/link';
@@ -19,7 +19,7 @@ const navItems = [
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, users, setCurrentUser, isDataLoaded } = useAppContext();
+  const { currentUser, users, setCurrentUser, isDataLoaded, setTheme } = useAppContext();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
@@ -55,6 +55,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push('/');
   };
 
+  const currentTheme = currentUser ? users[currentUser].theme : 'light';
+  const toggleTheme = () => {
+    setTheme(currentTheme === 'light' ? 'dark' : 'light');
+  };
+
   const profileName = currentUser === 'lui' ? 'Aleh' : 'Angeh';
   const profileInitial = 'A';
 
@@ -73,10 +78,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
           <div className="flex flex-col gap-2">
-             <div className="flex items-center gap-2">
-                <ThemeSwitcher />
-                {open && <span className="text-sm">{users[currentUser!].theme === 'dark' ? 'Tema Scuro' : 'Tema Chiaro'}</span>}
-             </div>
+            <SidebarLink
+                link={{
+                    label: currentTheme === 'dark' ? 'Tema Scuro' : 'Tema Chiaro',
+                    href: "#",
+                    icon: <ThemeSwitcher />,
+                }}
+                onClick={toggleTheme}
+            />
              <SidebarLink
                 link={{
                     label: "Logout",
