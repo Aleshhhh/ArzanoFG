@@ -96,13 +96,12 @@ export default function CalendarPage() {
     if (previewToRemove.startsWith('data:')) {
       const fileIndexToRemove = photoFiles.findIndex(file => {
         // This is a bit of a hack, but we find the corresponding file to remove
-        const fileReader = new FileReader();
         return new Promise(resolve => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 resolve(reader.result === previewToRemove);
             };
-            reader.readAsDataURL(file);
+            if(file) reader.readAsDataURL(file);
         });
       });
       if (fileIndexToRemove !== -1) {
@@ -123,7 +122,7 @@ export default function CalendarPage() {
     const fromDate = selectedDate || new Date();
     setEditingEvent({ 
       ...initialEventState, 
-      dateRange: { from: fromDate, to: undefined } 
+      dateRange: { from: fromDate, to: fromDate } 
     });
     setPhotoFiles([]);
     setPhotoPreviews([]);
@@ -134,7 +133,7 @@ export default function CalendarPage() {
     const eventPhotos = event.photoIds.map(id => photos.find(p => p.id === id)).filter(Boolean) as Photo[];
     setEditingEvent({
         ...event,
-        dateRange: { from: parseISO(event.startDate), to: event.endDate ? parseISO(event.endDate) : undefined },
+        dateRange: { from: parseISO(event.startDate), to: event.endDate ? parseISO(event.endDate) : parseISO(event.startDate) },
         tags: event.tags.join(', ')
     });
     setPhotoFiles([]);
@@ -341,7 +340,7 @@ export default function CalendarPage() {
                                 >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
                                 {editingEvent.dateRange?.from ? (
-                                    editingEvent.dateRange.to ? (
+                                    editingEvent.dateRange.to && editingEvent.dateRange.to.getTime() !== editingEvent.dateRange.from.getTime() ? (
                                     <>
                                         {format(editingEvent.dateRange.from, "d MMMM yyyy", { locale: it })} -{' '}
                                         {format(editingEvent.dateRange.to, "d MMMM yyyy", { locale: it })}
@@ -355,6 +354,14 @@ export default function CalendarPage() {
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
+                                <div className="p-2 border-b">
+                                  <div className="text-sm font-medium">
+                                      <span className="text-muted-foreground">Data inizio:</span> {editingEvent.dateRange.from ? format(editingEvent.dateRange.from, 'd MMM yyyy') : '...'}
+                                  </div>
+                                  <div className="text-sm font-medium">
+                                      <span className="text-muted-foreground">Data fine:</span> {editingEvent.dateRange.to ? format(editingEvent.dateRange.to, 'd MMM yyyy') : '...'}
+                                  </div>
+                                </div>
                                 <Calendar
                                     initialFocus
                                     mode="range"
@@ -413,3 +420,5 @@ export default function CalendarPage() {
     </>
   );
 }
+
+    
