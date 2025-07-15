@@ -94,7 +94,7 @@ export default function GalleryPage() {
               <DialogTitle className="font-headline text-2xl">Aggiungi una nuova foto</DialogTitle>
             </DialogHeader>
             <ScrollArea className="-mx-6 px-6 max-h-[70vh]">
-              <div className="px-4 py-4 space-y-6">
+              <div className="space-y-6 py-4 px-4">
                 <div className="space-y-2">
                   <Label htmlFor="photo-file">Foto</Label>
                   <FileInput
