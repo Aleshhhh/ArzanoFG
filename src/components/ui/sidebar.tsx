@@ -190,18 +190,18 @@ export const SidebarLink = ({
       )}
       {...props}
     >
+      <AnimatePresence>
         {isSelected && (
           <motion.div
-            layoutId="sidebar-highlight"
-            className="absolute h-14 w-14 bg-secondary rounded-lg z-0"
-            initial={false}
+            className="absolute left-0 top-0 h-full bg-secondary rounded-lg z-0"
+            initial={{ width: open ? '100%' : '56px' }}
             animate={{
               width: open ? '100%' : '56px',
-              height: '56px',
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           />
         )}
+      </AnimatePresence>
       <div className="w-14 h-14 flex items-center justify-center shrink-0 z-10">
         {link.icon}
       </div>
