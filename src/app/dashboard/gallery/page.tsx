@@ -93,17 +93,21 @@ export default function GalleryPage() {
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl">Aggiungi una nuova foto</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="max-h-[70vh] -mx-6 px-6">
-                <div className="space-y-6 py-4 px-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="photo-file">Foto</Label>
-                        <FileInput id="photo-file" accept="image/*" onFileChange={handleFileChange} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Descrizione</Label>
-                        <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
-                    </div>
+            <ScrollArea className="-mx-6 px-6 max-h-[70vh]">
+              <div className="px-4 py-4 space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="photo-file">Foto</Label>
+                  <FileInput
+                    id="photo-file"
+                    accept="image/*"
+                    onFileChange={handleFileChange}
+                  />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrizione</Label>
+                  <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
+                </div>
+              </div>
             </ScrollArea>
             <DialogFooter>
               <DialogClose asChild>
