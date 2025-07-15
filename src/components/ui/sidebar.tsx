@@ -94,7 +94,7 @@ export const DesktopSidebar = ({
           className
         )}
         animate={{
-          width: animate ? (open ? "300px" : "80px") : "300px",
+          width: animate ? (open ? "300px" : "90px") : "300px",
         }}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -169,17 +169,23 @@ export const SidebarLink = ({
   [key: string]: any;
 }) => {
   const { open, animate } = useSidebar();
+  const isSelected = className?.includes('bg-secondary');
+
   return (
     <Link
       href={link.href}
       className={cn(
         "flex items-center group/sidebar transition-colors duration-200 rounded-lg h-12",
-        className?.includes('bg-secondary') ? "" : "hover:bg-secondary/50",
+        !isSelected && "hover:bg-secondary/50",
+        open && isSelected && "bg-secondary",
         className
       )}
       {...props}
     >
-      <div className={cn("grid place-content-center flex-shrink-0 w-[64px] h-full rounded-lg", className?.includes('bg-secondary') ? "bg-secondary" : "")}>
+      <div className={cn(
+          "grid place-content-center flex-shrink-0 w-[64px] h-full",
+          !open && isSelected && "bg-secondary rounded-lg"
+      )}>
         {link.icon}
       </div>
       <motion.span
