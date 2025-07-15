@@ -259,8 +259,8 @@ export default function CalendarPage() {
               modifiersStyles={{
                   event: {
                       border: "2px solid hsl(var(--primary))",
-                      color: "hsl(var(--primary-foreground))",
-                      backgroundColor: "hsl(var(--primary) / 0.5)"
+                      color: "hsl(var(--secondary-foreground))",
+                      backgroundColor: "hsl(var(--primary))"
                   }
               }}
             />
@@ -298,7 +298,7 @@ export default function CalendarPage() {
                              <div className="text-sm font-semibold text-muted-foreground capitalize">{format(parseISO(event.startDate), 'd MMM yyyy', { locale: it })}</div>
                              {mainTag && (
                                 <div className="flex items-center gap-1">
-                                    <Badge variant="outline" className="border-primary/50 bg-primary/20 text-primary-foreground">{mainTag}</Badge>
+                                    <Badge variant="outline">{mainTag}</Badge>
                                     {extraTagsCount > 0 && <Badge variant="secondary" className="px-2">+{extraTagsCount}</Badge>}
                                 </div>
                              )}
