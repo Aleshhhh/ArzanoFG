@@ -302,8 +302,8 @@ export default function CalendarPage() {
                 <DialogTitle className="font-headline text-2xl">{editingEvent?.id ? 'Modifica ricordo' : 'Aggiungi un nuovo ricordo'}</DialogTitle>
             </DialogHeader>
             {editingEvent && (
-                <ScrollArea className="max-h-[70vh] -mx-6 px-6 py-6">
-                    <div className="grid gap-6 pr-4">
+                <ScrollArea className="max-h-[70vh] -mx-6 px-6">
+                    <div className="grid gap-6 py-4 pr-1">
                         <div className="space-y-2">
                             <Label htmlFor="title">Titolo</Label>
                             <Input id="title" value={editingEvent.title} onChange={(e) => handleFormChange('title', e.target.value)} />
