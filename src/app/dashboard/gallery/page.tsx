@@ -13,7 +13,6 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAppContext } from '@/context/AppContext';
@@ -23,6 +22,7 @@ import Image from 'next/image';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { FileInput } from '@/components/ui/file-input';
 
 export default function GalleryPage() {
   const { photos, addPhoto } = useAppContext();
@@ -88,14 +88,14 @@ export default function GalleryPage() {
               <PlusCircle className="mr-2 h-4 w-4" /> Aggiungi Foto
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] bg-card/80 backdrop-blur-lg">
+          <DialogContent className="sm:max-w-lg bg-card/80 backdrop-blur-lg">
             <DialogHeader>
-              <DialogTitle className="font-headline">Aggiungi una nuova foto</DialogTitle>
+              <DialogTitle className="font-headline text-2xl">Aggiungi una nuova foto</DialogTitle>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="space-y-6 py-4 px-4">
               <div className="space-y-2">
                 <Label htmlFor="photo-file">Foto</Label>
-                <Input id="photo-file" type="file" accept="image/*" onChange={handleFileChange} />
+                <FileInput id="photo-file" accept="image/*" onFileChange={handleFileChange} />
               </div>
               {preview && (
                  <div className="relative w-full h-48 mt-2 rounded-md overflow-hidden border">
@@ -109,8 +109,9 @@ export default function GalleryPage() {
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="submit" onClick={handleAddPhoto}>Salva Foto</Button>
+                <Button variant="outline">Annulla</Button>
               </DialogClose>
+              <Button type="submit" onClick={handleAddPhoto}>Salva Foto</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
