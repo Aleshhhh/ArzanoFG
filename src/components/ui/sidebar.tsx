@@ -173,36 +173,31 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center gap-2 group/sidebar transition-colors duration-200",
-        !open && "justify-center",
-        className && (className.includes('bg-secondary'))
-          ? "bg-secondary rounded-lg"
-          : "hover:bg-secondary rounded-lg",
+        "flex items-center justify-start group/sidebar transition-colors duration-200 rounded-lg",
+        className?.includes('bg-secondary') ? "bg-secondary" : "hover:bg-secondary",
         className
       )}
       {...props}
     >
-      <div className={cn("p-3 flex items-center")}>
-        <div className="w-6 h-6 flex items-center justify-center">
-          {link.icon}
-        </div>
-        <motion.span
-          animate={{
-            opacity: open || !animate ? 1 : 0,
-            width: open || !animate ? "auto" : 0,
-            marginLeft: open || !animate ? "0.5rem" : "0",
-          }}
-          transition={{
-            duration: 0.15,
-          }}
-          className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block overflow-hidden"
-        >
-          {link.label}
-        </motion.span>
+      <div className="w-[54px] h-[54px] flex-shrink-0 flex items-center justify-center">
+        {link.icon}
       </div>
+      <motion.span
+        animate={{
+          opacity: open || !animate ? 1 : 0,
+          width: open || !animate ? "auto" : 0,
+        }}
+        transition={{
+          duration: 0.15,
+        }}
+        className="text-foreground text-sm whitespace-pre overflow-hidden"
+      >
+        {link.label}
+      </motion.span>
     </Link>
   );
 };
+
 
 export const Logo = () => {
   return (
