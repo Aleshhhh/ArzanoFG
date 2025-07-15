@@ -111,7 +111,9 @@ export default function GalleryPage() {
               <DialogClose asChild>
                 <Button variant="outline">Annulla</Button>
               </DialogClose>
-              <Button type="submit" onClick={handleAddPhoto}>Salva Foto</Button>
+              <DialogClose asChild>
+                <Button type="submit" onClick={handleAddPhoto}>Salva Foto</Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
