@@ -84,9 +84,9 @@ export default function MilestonesPage() {
             <CardTitle className="text-sm font-medium">Giorni Totali Insieme</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="flex-grow flex flex-col justify-center items-center gap-2">
+          <CardContent className="flex-grow flex flex-col items-start gap-4">
             <div className="text-6xl font-bold font-headline">{totalDaysTogether}</div>
-            <p className="text-xs text-muted-foreground text-center">giorni totali segnati come 'Insieme'!</p>
+            <p className="text-xs text-muted-foreground">giorni totali segnati come 'Insieme'!</p>
           </CardContent>
         </Card>
         <Card className="bg-card/50 flex flex-col">
@@ -94,9 +94,9 @@ export default function MilestonesPage() {
             <CardTitle className="text-sm font-medium">Mesi Completi</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="flex-grow flex flex-col justify-center items-center gap-2">
+          <CardContent className="flex-grow flex flex-col items-start gap-4">
             <div className="text-6xl font-bold font-headline">{completeMonths}</div>
-            <p className="text-xs text-muted-foreground text-center">Ogni "mese" è un set di 31 giorni totali passati insieme.</p>
+            <p className="text-xs text-muted-foreground">Ogni "mese" è un set di 31 giorni totali passati insieme.</p>
           </CardContent>
         </Card>
       </div>
