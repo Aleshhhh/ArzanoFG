@@ -14,12 +14,11 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { useAppContext } from '@/context/AppContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Heart, Calendar, Image as ImageIcon, Trophy, Sparkles, LogOut, User } from 'lucide-react';
-import { usePathname } from 'next/navigation';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 const navItems = [
@@ -33,6 +32,7 @@ const navItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, isDataLoaded, setCurrentUser } = useAppContext();
   const router = useRouter();
+  const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
