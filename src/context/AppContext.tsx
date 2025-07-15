@@ -29,7 +29,6 @@ interface AppData {
   events: AppEvent[];
   photos: Photo[];
   checkedDays: CheckedDays;
-  perfectMonthsCount: number;
 }
 
 interface AppContextType extends AppData {
@@ -39,7 +38,6 @@ interface AppContextType extends AppData {
   updateEvent: (event: AppEvent) => void;
   addPhoto: (photo: Photo) => void;
   updateCheckedDays: (year: number, month: number, day: number) => void;
-  incrementPerfectMonths: () => void;
   isDataLoaded: boolean;
 }
 
@@ -52,7 +50,6 @@ const defaultState: AppData = {
   events: [],
   photos: [],
   checkedDays: {},
-  perfectMonthsCount: 0,
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -73,6 +70,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (!initialState.photos) {
             initialState.photos = [];
         }
+        if (initialState.perfectMonthsCount) {
+          delete initialState.perfectMonthsCount;
+        }
+
 
         // Apply theme immediately if a user is stored
         if (initialState.currentUser && initialState.users[initialState.currentUser]) {
@@ -165,12 +166,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const incrementPerfectMonths = () => {
-    setData(prev => ({...prev, perfectMonthsCount: prev.perfectMonthsCount + 1 }));
-  }
-
   return (
-    <AppContext.Provider value={{ ...data, setCurrentUser, setTheme, addEvent, updateEvent, addPhoto, updateCheckedDays, incrementPerfectMonths, isDataLoaded }}>
+    <AppContext.Provider value={{ ...data, setCurrentUser, setTheme, addEvent, updateEvent, addPhoto, updateCheckedDays, isDataLoaded }}>
       {children}
     </AppContext.Provider>
   );

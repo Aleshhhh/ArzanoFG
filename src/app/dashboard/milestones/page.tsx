@@ -1,32 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, CalendarHeart, CheckCircle2 } from 'lucide-react';
 import { differenceInYears, differenceInMonths, getDaysInMonth, format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useAppContext } from '@/context/AppContext';
-import { useToast } from '@/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 const START_DATE = new Date('2024-08-25T00:00:00');
 
 export default function MilestonesPage() {
-  const { checkedDays, perfectMonthsCount, incrementPerfectMonths } = useAppContext();
+  const { checkedDays } = useAppContext();
   const [timeTogether, setTimeTogether] = useState({ years: 0, months: 0 });
-  const [showCongrats, setShowCongrats] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
+    setIsClient(true);
     const now = new Date();
     
     const years = differenceInYears(now, START_DATE);
@@ -37,31 +26,35 @@ export default function MilestonesPage() {
     }
     
     setTimeTogether({ years, months: totalMonths });
-    setIsClient(true);
   }, []);
+
+  const { totalDaysTogether, completeMonths } = useMemo(() => {
+    let totalDays = 0;
+    const uniqueDayNumbers = new Set<number>();
+
+    if (checkedDays) {
+      for (const year in checkedDays) {
+        for (const month in checkedDays[year]) {
+          const days = checkedDays[year][month];
+          totalDays += days.length;
+          days.forEach(day => uniqueDayNumbers.add(day));
+        }
+      }
+    }
+    
+    const calculatedCompleteMonths = Math.floor(uniqueDayNumbers.size / 31);
+    
+    return {
+      totalDaysTogether: totalDays,
+      completeMonths: calculatedCompleteMonths,
+    };
+  }, [checkedDays]);
 
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth() + 1;
   const daysInCurrentMonth = getDaysInMonth(today);
-  const checkedDaysForCurrentMonth = checkedDays[currentYear]?.[currentMonth] || [];
-
-  useEffect(() => {
-    if (!isClient) return;
-    const isMonthCompleted = checkedDaysForCurrentMonth.length >= daysInCurrentMonth;
-    const completedMonthId = `${currentYear}-${currentMonth}`;
-    const hasBeenCongratulated = localStorage.getItem(completedMonthId) === 'true';
-
-    if (isMonthCompleted && !hasBeenCongratulated) {
-      setShowCongrats(true);
-      incrementPerfectMonths();
-      localStorage.setItem(completedMonthId, 'true');
-      toast({
-        title: "Congratulazioni!",
-        description: "Avete completato un altro mese insieme!"
-      });
-    }
-  }, [isClient, checkedDaysForCurrentMonth.length, daysInCurrentMonth, incrementPerfectMonths, toast, currentYear, currentMonth]);
+  const checkedDaysForCurrentMonth = (isClient && checkedDays[currentYear]?.[currentMonth]) || [];
   
   if (!isClient) {
     return (
@@ -78,7 +71,7 @@ export default function MilestonesPage() {
         <p className="text-muted-foreground mt-1">Celebrando ogni passo del nostro viaggio.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="bg-card/50 backdrop-blur-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Tempo Insieme</CardTitle>
@@ -92,12 +85,22 @@ export default function MilestonesPage() {
         </Card>
         <Card className="bg-card/50 backdrop-blur-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Mesi Perfetti</CardTitle>
+            <CardTitle className="text-sm font-medium">Giorni Totali Insieme</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-6xl font-bold font-headline">{perfectMonthsCount}</div>
-            <p className="text-xs text-muted-foreground">Mesi con ogni giorno 'Insieme' segnato!</p>
+            <div className="text-6xl font-bold font-headline">{totalDaysTogether}</div>
+            <p className="text-xs text-muted-foreground">giorni totali segnati come 'Insieme'!</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card/50 backdrop-blur-lg">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Mesi Completi</CardTitle>
+            <CalendarHeart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-6xl font-bold font-headline">{completeMonths}</div>
+            <p className="text-xs text-muted-foreground">Ogni "mese" è un set di 31 giorni unici passati insieme.</p>
           </CardContent>
         </Card>
       </div>
@@ -124,21 +127,6 @@ export default function MilestonesPage() {
           </div>
         </CardContent>
       </Card>
-      
-      <AlertDialog open={showCongrats} onOpenChange={setShowCongrats}>
-        <AlertDialogContent className="bg-card/80 backdrop-blur-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="font-headline text-center text-3xl">Congratulazioni!</AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-base pt-4 capitalize">
-              Avete segnato ogni giorno di {format(today, 'MMMM', { locale: it })} come un giorno 'Insieme'!
-              Un altro bellissimo mese aggiunto alla vostra storia d'amore.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction className="w-full">Continuate ad amarvi</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
