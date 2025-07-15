@@ -301,93 +301,95 @@ export default function CalendarPage() {
                 <DialogTitle className="font-headline text-2xl">{editingEvent?.id ? 'Modifica ricordo' : 'Aggiungi un nuovo ricordo'}</DialogTitle>
             </DialogHeader>
             {editingEvent && (
-                <div className="grid gap-6 py-6 max-h-[70vh] overflow-y-auto pr-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="title">Titolo</Label>
-                        <Input id="title" value={editingEvent.title} onChange={(e) => handleFormChange('title', e.target.value)} />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="date">Data</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-start text-left font-normal",
-                                    !editingEvent.dateRange?.from && "text-muted-foreground"
-                                )}
-                                >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {editingEvent.dateRange?.from ? (
-                                    editingEvent.dateRange.to ? (
-                                    <>
-                                        {format(editingEvent.dateRange.from, "d MMMM", { locale: it })} -{' '}
-                                        {format(editingEvent.dateRange.to, "d MMMM yyyy", { locale: it })}
-                                    </>
-                                    ) : (
-                                    format(editingEvent.dateRange.from, "d MMMM yyyy", { locale: it })
-                                    )
-                                ) : (
-                                    <span>Scegli una data</span>
-                                )}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <div className="p-2 border-b">
-                                  <div className="text-sm font-medium">
-                                      <span className="text-muted-foreground">Data inizio:</span> {editingEvent.dateRange.from ? format(editingEvent.dateRange.from, 'd MMM yyyy', {locale: it}) : '...'}
-                                  </div>
-                                  <div className="text-sm font-medium">
-                                      <span className="text-muted-foreground">Data fine:</span> {editingEvent.dateRange.to ? format(editingEvent.dateRange.to, 'd MMM yyyy', {locale: it}) : '...'}
-                                  </div>
-                                </div>
-                                <Calendar
-                                    initialFocus
-                                    mode="range"
-                                    defaultMonth={editingEvent.dateRange?.from}
-                                    selected={editingEvent.dateRange}
-                                    onSelect={handleDateRangeSelect}
-                                    numberOfMonths={1}
-                                    locale={it}
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Descrizione</Label>
-                        <Textarea id="description" value={editingEvent.description} onChange={(e) => handleFormChange('description', e.target.value)} rows={4} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="tags">Tags</Label>
-                        <Input id="tags" value={editingEvent.tags} onChange={(e) => handleFormChange('tags', e.target.value)} placeholder="Insieme, Speciale, Divertente" />
-                        <p className="text-xs text-muted-foreground">Usa 'Insieme' per segnare i giorni sul tracciatore.</p>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Allega foto</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {existingPhotoPreviews.map((photo, index) => (
-                                <div key={photo.id} className="relative w-full h-24 rounded-md overflow-hidden border group">
-                                    <Image src={photo.imageDataUrl} alt={`Foto ${index + 1}`} layout="fill" objectFit="cover" />
-                                    <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removePhoto(index, 'existing')}>
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                            {editingEvent.newPhotoPreviews.map((preview, index) => (
-                                <div key={`new-${index}`} className="relative w-full h-24 rounded-md overflow-hidden border group">
-                                    <Image src={preview} alt={`Anteprima ${index + 1}`} layout="fill" objectFit="cover" />
-                                    <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removePhoto(index, 'new')}>
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                <div className="py-6 max-h-[70vh] overflow-y-auto">
+                    <div className="grid gap-6 pr-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="title">Titolo</Label>
+                            <Input id="title" value={editingEvent.title} onChange={(e) => handleFormChange('title', e.target.value)} />
                         </div>
-                        <FileInput
-                            id="photo-upload"
-                            accept="image/*"
-                            onFileChange={handleFileChange}
-                            multiple
-                        />
+                        <div className="space-y-2">
+                            <Label htmlFor="date">Data</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !editingEvent.dateRange?.from && "text-muted-foreground"
+                                    )}
+                                    >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {editingEvent.dateRange?.from ? (
+                                        editingEvent.dateRange.to ? (
+                                        <>
+                                            {format(editingEvent.dateRange.from, "d MMMM", { locale: it })} -{' '}
+                                            {format(editingEvent.dateRange.to, "d MMMM yyyy", { locale: it })}
+                                        </>
+                                        ) : (
+                                        format(editingEvent.dateRange.from, "d MMMM yyyy", { locale: it })
+                                        )
+                                    ) : (
+                                        <span>Scegli una data</span>
+                                    )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <div className="p-2 border-b">
+                                    <div className="text-sm font-medium">
+                                        <span className="text-muted-foreground">Data inizio:</span> {editingEvent.dateRange.from ? format(editingEvent.dateRange.from, 'd MMM yyyy', {locale: it}) : '...'}
+                                    </div>
+                                    <div className="text-sm font-medium">
+                                        <span className="text-muted-foreground">Data fine:</span> {editingEvent.dateRange.to ? format(editingEvent.dateRange.to, 'd MMM yyyy', {locale: it}) : '...'}
+                                    </div>
+                                    </div>
+                                    <Calendar
+                                        initialFocus
+                                        mode="range"
+                                        defaultMonth={editingEvent.dateRange?.from}
+                                        selected={editingEvent.dateRange}
+                                        onSelect={handleDateRangeSelect}
+                                        numberOfMonths={1}
+                                        locale={it}
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="description">Descrizione</Label>
+                            <Textarea id="description" value={editingEvent.description} onChange={(e) => handleFormChange('description', e.target.value)} rows={4} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="tags">Tags</Label>
+                            <Input id="tags" value={editingEvent.tags} onChange={(e) => handleFormChange('tags', e.target.value)} placeholder="Insieme, Speciale, Divertente" />
+                            <p className="text-xs text-muted-foreground">Usa 'Insieme' per segnare i giorni sul tracciatore.</p>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Allega foto</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {existingPhotoPreviews.map((photo, index) => (
+                                    <div key={photo.id} className="relative w-full h-24 rounded-md overflow-hidden border group">
+                                        <Image src={photo.imageDataUrl} alt={`Foto ${index + 1}`} layout="fill" objectFit="cover" />
+                                        <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removePhoto(index, 'existing')}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                {editingEvent.newPhotoPreviews.map((preview, index) => (
+                                    <div key={`new-${index}`} className="relative w-full h-24 rounded-md overflow-hidden border group">
+                                        <Image src={preview} alt={`Anteprima ${index + 1}`} layout="fill" objectFit="cover" />
+                                        <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removePhoto(index, 'new')}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                            <FileInput
+                                id="photo-upload"
+                                accept="image/*"
+                                onFileChange={handleFileChange}
+                                multiple
+                            />
+                        </div>
                     </div>
                 </div>
             )}
