@@ -124,8 +124,8 @@ export default function RecapPage() {
             <CardContent>
                 {isLoading && (
                     <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
-                        <p className="font-semibold">La nostra AI sta scrivendo la vostra storia d'amore...</p>
+                        <div className="w-20 h-20 border-8 border-t-primary border-muted rounded-full animate-spin"></div>
+                        <p className="font-semibold mt-4">La nostra AI sta scrivendo la vostra storia d'amore...</p>
                         <p className="text-sm">Potrebbe volerci un momento.</p>
                     </div>
                 )}
