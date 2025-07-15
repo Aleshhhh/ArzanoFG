@@ -20,6 +20,7 @@ import { Photo } from '@/lib/types';
 import { PlusCircle, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { format, parseISO } from 'date-fns';
+import { it } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 
 export default function GalleryPage() {
@@ -43,8 +44,8 @@ export default function GalleryPage() {
   const handleAddPhoto = () => {
     if (!newPhoto.file || !preview) {
         toast({
-            title: "Error",
-            description: "Please select a photo to upload.",
+            title: "Errore",
+            description: "Per favore seleziona una foto da caricare.",
             variant: "destructive"
         })
         return
@@ -62,8 +63,8 @@ export default function GalleryPage() {
     setNewPhoto({ description: '', file: null });
     setPreview(null);
     toast({
-        title: "Photo Added!",
-        description: "Your new memory has been added to the gallery."
+        title: "Foto Aggiunta!",
+        description: "Il tuo nuovo ricordo è stato aggiunto alla galleria."
     });
   };
   
@@ -73,37 +74,37 @@ export default function GalleryPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-headline text-3xl md:text-4xl">Our Gallery</h1>
-          <p className="text-muted-foreground mt-1">A collection of our most cherished moments.</p>
+          <h1 className="font-headline text-3xl md:text-4xl">La Nostra Galleria</h1>
+          <p className="text-muted-foreground mt-1">Una collezione dei nostri momenti più preziosi.</p>
         </div>
         <Dialog onOpenChange={() => {setPreview(null); setNewPhoto({ description: '', file: null })}}>
           <DialogTrigger asChild>
             <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Photo
+              <PlusCircle className="mr-2 h-4 w-4" /> Aggiungi Foto
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-card/80 backdrop-blur-lg">
             <DialogHeader>
-              <DialogTitle className="font-headline">Add a new photo</DialogTitle>
+              <DialogTitle className="font-headline">Aggiungi una nuova foto</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="photo-file">Photo</Label>
+                <Label htmlFor="photo-file">Foto</Label>
                 <Input id="photo-file" type="file" accept="image/*" onChange={handleFileChange} />
               </div>
               {preview && (
                  <div className="relative w-full h-48 mt-2 rounded-md overflow-hidden border">
-                    <Image src={preview} alt="Preview" layout="fill" objectFit="contain" />
+                    <Image src={preview} alt="Anteprima" layout="fill" objectFit="contain" />
                  </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Descrizione</Label>
                 <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
               </div>
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="submit" onClick={handleAddPhoto}>Save Photo</Button>
+                <Button type="submit" onClick={handleAddPhoto}>Salva Foto</Button>
               </DialogClose>
             </DialogFooter>
           </DialogContent>
@@ -121,7 +122,7 @@ export default function GalleryPage() {
               </CardContent>
               <CardFooter className="flex-col items-start p-4">
                  <p className="font-semibold text-sm">{photo.description}</p>
-                 <p className="text-xs text-muted-foreground">{format(parseISO(photo.date), "MMMM d, yyyy")}</p>
+                 <p className="text-xs text-muted-foreground capitalize">{format(parseISO(photo.date), "MMMM d, yyyy", { locale: it })}</p>
               </CardFooter>
             </Card>
           ))}
@@ -129,8 +130,8 @@ export default function GalleryPage() {
       ) : (
         <div className="text-center py-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-muted-foreground bg-card/30">
           <ImageIcon className="w-16 h-16 mb-4" />
-          <h3 className="font-headline text-2xl">Your gallery is empty</h3>
-          <p>Start by adding your first photo together!</p>
+          <h3 className="font-headline text-2xl">La tua galleria è vuota</h3>
+          <p>Inizia aggiungendo la vostra prima foto insieme!</p>
         </div>
       )}
     </div>

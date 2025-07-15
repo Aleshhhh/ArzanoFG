@@ -23,10 +23,10 @@ import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 const navItems = [
     { href: '/dashboard', label: 'Home', icon: Heart },
-    { href: '/dashboard/calendar', label: 'Calendar', icon: Calendar },
-    { href: '/dashboard/gallery', label: 'Gallery', icon: ImageIcon },
-    { href: '/dashboard/milestones', label: 'Milestones', icon: Trophy },
-    { href: '/dashboard/recap', label: 'Monthly Recap', icon: Sparkles },
+    { href: '/dashboard/calendar', label: 'Calendario', icon: Calendar },
+    { href: '/dashboard/gallery', label: 'Galleria', icon: ImageIcon },
+    { href: '/dashboard/milestones', label: 'Traguardi', icon: Trophy },
+    { href: '/dashboard/recap', label: 'Riepilogo Mensile', icon: Sparkles },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isDataLoaded || !currentUser) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="font-headline text-2xl">Loading your love story...</div>
+        <div className="font-headline text-2xl">Caricando la vostra storia d'amore...</div>
       </div>
     );
   }
@@ -53,17 +53,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push('/');
   };
 
-  const profileName = currentUser === 'lui' ? 'Sayan' : 'La Sua Anima Gemella';
-  const profileInitial = currentUser === 'lui' ? 'S' : 'A';
+  const profileName = currentUser === 'lui' ? 'Aleh' : 'Angeh';
+  const profileInitial = 'A';
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-background">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
               <Heart className="text-primary" />
-              <h1 className="font-headline text-xl font-semibold">Amore Eterno</h1>
+              <h1 className="font-headline text-xl font-semibold">Arzano Foggia</h1>
               <div className="ml-auto">
                 <SidebarTrigger />
               </div>
@@ -101,7 +101,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-            <main className="p-4 sm:p-6 lg:p-8 h-full">{children}</main>
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+              <div className="container mx-auto max-w-7xl">
+                {children}
+              </div>
+            </main>
         </SidebarInset>
       </div>
     </SidebarProvider>

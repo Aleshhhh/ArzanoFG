@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, CalendarHeart, CheckCircle2 } from 'lucide-react';
 import { differenceInYears, differenceInMonths, getDaysInMonth, format } from 'date-fns';
+import { it } from 'date-fns/locale';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -45,7 +46,6 @@ export default function MilestonesPage() {
 
   useEffect(() => {
     const isMonthCompleted = checkedDaysForCurrentMonth.length >= daysInCurrentMonth;
-    // Check against a flag in localstorage or context to show only once per completed month
     const completedMonthId = `${currentYear}-${currentMonth}`;
     const hasBeenCongratulated = localStorage.getItem(completedMonthId) === 'true';
 
@@ -54,8 +54,8 @@ export default function MilestonesPage() {
       incrementPerfectMonths();
       localStorage.setItem(completedMonthId, 'true');
       toast({
-        title: "Congratulations!",
-        description: "You've completed another month together!"
+        title: "Congratulazioni!",
+        description: "Avete completato un altro mese insieme!"
       });
     }
   }, [checkedDaysForCurrentMonth.length, daysInCurrentMonth, incrementPerfectMonths, toast, currentYear, currentMonth]);
@@ -63,38 +63,38 @@ export default function MilestonesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-headline text-3xl md:text-4xl">Our Milestones</h1>
-        <p className="text-muted-foreground mt-1">Celebrating every step of our journey.</p>
+        <h1 className="font-headline text-3xl md:text-4xl">I Nostri Traguardi</h1>
+        <p className="text-muted-foreground mt-1">Celebrando ogni passo del nostro viaggio.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="bg-card/50 backdrop-blur-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Time Together</CardTitle>
+            <CardTitle className="text-sm font-medium">Tempo Insieme</CardTitle>
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="text-4xl font-bold font-headline">{timeTogether.years} <span className="text-2xl text-muted-foreground">Years</span></div>
-            <div className="text-4xl font-bold font-headline">{timeTogether.months} <span className="text-2xl text-muted-foreground">Months</span></div>
-            <p className="text-xs text-muted-foreground">since August 25, 2024</p>
+            <div className="text-4xl font-bold font-headline">{timeTogether.years} <span className="text-2xl text-muted-foreground">Anni</span></div>
+            <div className="text-4xl font-bold font-headline">{timeTogether.months} <span className="text-2xl text-muted-foreground">Mesi</span></div>
+            <p className="text-xs text-muted-foreground">dal 25 Agosto 2024</p>
           </CardContent>
         </Card>
         <Card className="bg-card/50 backdrop-blur-lg">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Perfect Months</CardTitle>
+            <CardTitle className="text-sm font-medium">Mesi Perfetti</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-6xl font-bold font-headline">{perfectMonthsCount}</div>
-            <p className="text-xs text-muted-foreground">Months with every 'Insieme' day marked!</p>
+            <p className="text-xs text-muted-foreground">Mesi con ogni giorno 'Insieme' segnato!</p>
           </CardContent>
         </Card>
       </div>
 
       <Card className="bg-card/50 backdrop-blur-lg">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">Days 'Insieme' This Month</CardTitle>
-          <p className="text-muted-foreground text-sm">A checklist of our days together in {format(today, 'MMMM yyyy')}.</p>
+          <CardTitle className="font-headline text-2xl">Giorni 'Insieme' Questo Mese</CardTitle>
+          <p className="text-muted-foreground text-sm capitalize">Una checklist dei nostri giorni insieme a {format(today, 'MMMM yyyy', { locale: it })}.</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-10 lg:grid-cols-11 gap-2">
@@ -117,14 +117,14 @@ export default function MilestonesPage() {
       <AlertDialog open={showCongrats} onOpenChange={setShowCongrats}>
         <AlertDialogContent className="bg-card/80 backdrop-blur-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-headline text-center text-3xl">Congratulations!</AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-base pt-4">
-              You've marked every day of {format(today, 'MMMM')} as a day 'Insieme'!
-              Another beautiful month added to your love story.
+            <AlertDialogTitle className="font-headline text-center text-3xl">Congratulazioni!</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base pt-4 capitalize">
+              Avete segnato ogni giorno di {format(today, 'MMMM', { locale: it })} come un giorno 'Insieme'!
+              Un altro bellissimo mese aggiunto alla vostra storia d'amore.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction className="w-full">Keep loving</AlertDialogAction>
+            <AlertDialogAction className="w-full">Continuate ad amarvi</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

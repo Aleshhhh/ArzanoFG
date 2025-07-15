@@ -7,8 +7,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { User } from 'lucide-react';
 
 const profiles = [
-  { id: 'lui', name: 'Sayan', initial: 'S' },
-  { id: 'lei', name: 'La Sua Anima Gemella', initial: 'A' },
+  { id: 'lui', name: 'Aleh', initial: 'A' },
+  { id: 'lei', name: 'Angeh', initial: 'A' },
 ];
 
 export function ProfileSelector() {
@@ -36,7 +36,7 @@ export function ProfileSelector() {
                 </AvatarFallback>
               </Avatar>
               <h2 className="font-headline text-2xl font-semibold mt-4">{profile.name}</h2>
-              <p className="text-muted-foreground">Select Profile</p>
+              <p className="text-muted-foreground">Seleziona Profilo</p>
             </CardContent>
           </Card>
         </div>

@@ -37,19 +37,19 @@ const prompt = ai.definePrompt({
   name: 'generateMonthlyRecapPrompt',
   input: {schema: GenerateMonthlyRecapInputSchema},
   output: {schema: GenerateMonthlyRecapOutputSchema},
-  prompt: `You are a personal assistant creating a monthly recap for a couple.
+  prompt: `Sei un assistente personale che crea un riepilogo mensile per una coppia. Il tuo tono è caloroso, romantico e un po' poetico.
 
-  The recap should include a summary of the month's events, based on the provided notes and photos.
+Il riepilogo deve includere un sommario degli eventi del mese, basato sulle note e sulle foto fornite.
 
-  Month: {{{month}}}
-  Year: {{{year}}}
-  Notes: {{{notes}}}
-  Photos:
-  {{#each photos}}
-  {{media url=this}}
-  {{/each}}
+Mese: {{{month}}}
+Anno: {{{year}}}
+Note: {{{notes}}}
+Foto:
+{{#each photos}}
+{{media url=this}}
+{{/each}}
 
-  Write a coherent and engaging monthly recap using the above information.`,
+Scrivi un riepilogo mensile coerente e coinvolgente in italiano usando le informazioni qui sopra. Racconta una storia, non elencare solo i fatti.`,
 });
 
 const generateMonthlyRecapFlow = ai.defineFlow(
