@@ -89,7 +89,7 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0",
+          "h-full px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0 rounded-lg",
           className
         )}
         animate={{
@@ -119,7 +119,7 @@ export const MobileSidebar = ({
         )}
         {...props}
       >
-        <div className="flex-1 w-12">
+        <div className="flex justify-start items-center w-12">
             <LogoIcon />
         </div>
         <div className="flex justify-end z-20">
@@ -167,26 +167,27 @@ export const SidebarLink = ({
   className?: string;
   [key: string]: any;
 }) => {
-  const { open, animate } = useSidebar();
+  const { open } = useSidebar();
   return (
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-4 hover:bg-secondary rounded-lg group/sidebar p-3",
-        className
+        "flex items-center justify-start gap-4 hover:bg-secondary rounded-lg group/sidebar",
+        !open && "justify-center",
+         className
       )}
       {...props}
     >
-      <div className={cn("text-primary group-hover/sidebar:text-primary-foreground transition-colors", !open && "w-full flex justify-center")}>
+      <div className={cn("p-3 flex items-center justify-center", !open ? "w-full" : "")}>
         {link.icon}
       </div>
 
       <motion.span
         animate={{
-          display: animate ? (open ? "inline-block" : "none") : "inline-block",
-          opacity: animate ? (open ? 1 : 0) : 1,
+          display: open ? "inline-block" : "none",
+          opacity: open ? 1 : 0,
         }}
-        className="text-foreground dark:text-neutral-200 text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
       >
         {link.label}
       </motion.span>
@@ -216,7 +217,7 @@ export const LogoIcon = () => {
   return (
     <Link
       href="/dashboard"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20 w-12"
     >
       <div className="h-5 w-6 bg-primary dark:bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
     </Link>
