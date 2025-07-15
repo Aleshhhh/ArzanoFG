@@ -23,6 +23,7 @@ import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { FileInput } from '@/components/ui/file-input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function GalleryPage() {
   const { photos, addPhoto } = useAppContext();
@@ -88,20 +89,22 @@ export default function GalleryPage() {
               <PlusCircle className="mr-2 h-4 w-4" /> Aggiungi Foto
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-card/80 backdrop-blur-lg">
+          <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-lg">
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl">Aggiungi una nuova foto</DialogTitle>
             </DialogHeader>
-            <div className="space-y-6 py-4 px-4">
-              <div className="space-y-2">
-                <Label htmlFor="photo-file">Foto</Label>
-                <FileInput id="photo-file" accept="image/*" onFileChange={handleFileChange} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Descrizione</Label>
-                <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
-              </div>
-            </div>
+            <ScrollArea className="max-h-[70vh] -mx-6 px-6">
+                <div className="space-y-6 py-4 px-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="photo-file">Foto</Label>
+                        <FileInput id="photo-file" accept="image/*" onFileChange={handleFileChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Descrizione</Label>
+                        <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
+                    </div>
+                </div>
+            </ScrollArea>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">Annulla</Button>
