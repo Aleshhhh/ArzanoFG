@@ -168,35 +168,36 @@ export const SidebarLink = ({
   className?: string;
   [key: string]: any;
 }) => {
-  const { open } = useSidebar();
+  const { open, animate } = useSidebar();
   return (
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-2 group/sidebar",
+        "flex items-center gap-2 group/sidebar transition-colors duration-200",
+        !open && "justify-center",
+        className && (className.includes('bg-secondary'))
+          ? "bg-secondary rounded-lg"
+          : "hover:bg-secondary rounded-lg",
         className
       )}
       {...props}
     >
-      <div className={cn(
-        "p-3 rounded-lg flex items-center justify-center transition-colors duration-200 w-full",
-        className && className.includes('bg-secondary') ? "bg-secondary" : "hover:bg-secondary"
-      )}>
-        <div className="w-6 flex items-center justify-center">
-            {link.icon}
+      <div className={cn("p-3 flex items-center")}>
+        <div className="w-6 h-6 flex items-center justify-center">
+          {link.icon}
         </div>
         <motion.span
-            animate={{
-            opacity: open ? 1 : 0,
-            width: open ? "auto" : 0,
-            marginLeft: open ? "0.5rem" : "0",
-            }}
-            transition={{
+          animate={{
+            opacity: open || !animate ? 1 : 0,
+            width: open || !animate ? "auto" : 0,
+            marginLeft: open || !animate ? "0.5rem" : "0",
+          }}
+          transition={{
             duration: 0.15,
-            }}
-            className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block overflow-hidden"
+          }}
+          className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block overflow-hidden"
         >
-            {link.label}
+          {link.label}
         </motion.span>
       </div>
     </Link>
