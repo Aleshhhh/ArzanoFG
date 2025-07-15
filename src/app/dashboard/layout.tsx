@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!isDataLoaded || !currentUser) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="font-headline text-2xl">Caricando la vostra storia d'amore...</div>
+        <div className="w-20 h-20 border-8 border-t-primary border-muted rounded-full animate-spin"></div>
       </div>
     );
   }

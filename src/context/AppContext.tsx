@@ -47,7 +47,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     try {
       const storedData = localStorage.getItem(APP_STORAGE_KEY);
       if (storedData) {
-        setData(JSON.parse(storedData));
+        const parsedData = JSON.parse(storedData);
+        // Ensure photos array exists even if it's not in stored data
+        if (!parsedData.photos) {
+          parsedData.photos = [];
+        }
+        setData(parsedData);
       }
     } catch (error) {
       console.error("Failed to load data from localStorage", error);
@@ -58,7 +63,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (isDataLoaded) {
       try {
-        localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(data));
+        const dataToStore = {
+          ...data,
+          // Exclude imageDataUrl from photos before saving to localStorage
+          photos: data.photos.map(({ id, date, description }) => ({ id, date, description, imageDataUrl: '' })),
+        };
+        localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(dataToStore));
         const theme = data.currentUser ? data.users[data.currentUser].theme : 'light';
         document.documentElement.classList.toggle('dark', theme === 'dark');
       } catch (error) {
