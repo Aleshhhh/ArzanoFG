@@ -25,6 +25,7 @@ import { AppEvent, Photo } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { FileInput } from '@/components/ui/file-input';
 
 const initialEventState = {
   id: null,
@@ -246,14 +247,32 @@ export default function CalendarPage() {
                         <p className="text-xs text-muted-foreground">Usa 'Insieme' per segnare i giorni sul tracciatore.</p>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="photo-file">Allega una foto</Label>
-                        <Input id="photo-file" type="file" accept="image/*" onChange={handleFileChange} />
+                        <Label>Allega una foto</Label>
+                        {photoPreview ? (
+                            <div className="relative w-full h-40 mt-2 rounded-md overflow-hidden border">
+                                <Image src={photoPreview} alt="Anteprima" layout="fill" objectFit="contain" />
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-2 right-2"
+                                    onClick={() => {
+                                        setPhotoFile(null);
+                                        setPhotoPreview(null);
+                                        if (editingEvent?.photoId) {
+                                            handleFormChange('photoId', undefined);
+                                        }
+                                    }}
+                                >
+                                    Rimuovi
+                                </Button>
+                            </div>
+                        ) : (
+                            <FileInput
+                                accept="image/*"
+                                onFileChange={handleFileChange}
+                            />
+                        )}
                     </div>
-                    {photoPreview && (
-                        <div className="relative w-full h-40 mt-2 rounded-md overflow-hidden border">
-                            <Image src={photoPreview} alt="Anteprima" layout="fill" objectFit="contain" />
-                        </div>
-                    )}
                 </div>
             )}
             <SheetFooter>
