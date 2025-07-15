@@ -89,7 +89,7 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0 rounded-lg",
+          "h-full px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0",
           className
         )}
         animate={{
@@ -181,16 +181,22 @@ export const SidebarLink = ({
       <div className={cn("p-3 flex items-center justify-center", !open ? "w-full" : "")}>
         {link.icon}
       </div>
-
-      <motion.span
+      <motion.div
         animate={{
-          display: open ? "inline-block" : "none",
+          width: open ? "auto" : 0,
           opacity: open ? 1 : 0,
         }}
-        className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        transition={{
+          duration: 0.2,
+        }}
+        className="overflow-hidden"
       >
-        {link.label}
-      </motion.span>
+        <span
+          className="text-foreground text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        >
+          {link.label}
+        </span>
+      </motion.div>
     </Link>
   );
 };
