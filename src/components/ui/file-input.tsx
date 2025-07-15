@@ -9,7 +9,7 @@ interface FileInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
-  ({ onFileChange, className, ...props }, ref) => {
+  ({ onFileChange, className, id, ...props }, ref) => {
     const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
       e.preventDefault();
       e.stopPropagation();
@@ -30,7 +30,7 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
     return (
       <div className={cn("flex items-center justify-center w-full", className)}>
         <label
-          htmlFor="file-input"
+          htmlFor={id}
           className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-secondary/50 hover:bg-secondary border-primary/50 hover:border-primary transition-colors"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -42,7 +42,7 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
             </p>
             <p className="text-xs text-muted-foreground">PNG, JPG, GIF (MAX. 800x400px)</p>
           </div>
-          <input ref={ref} id="file-input" type="file" className="hidden" onChange={onFileChange} {...props} />
+          <input ref={ref} id={id} type="file" className="hidden" onChange={onFileChange} {...props} />
         </label>
       </div>
     );
