@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, CalendarHeart, CheckCircle2 } from 'lucide-react';
-import { differenceInYears, differenceInMonths, getDaysInMonth } from 'date-fns';
+import { differenceInYears, differenceInMonths, getDaysInMonth, format } from 'date-fns';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import {
