@@ -30,7 +30,7 @@ const navItems = [
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, isDataLoaded, setCurrentUser } = useAppContext();
+  const { currentUser, isDataLoaded, setCurrentUser, users } = useAppContext();
   const router = useRouter();
   const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
@@ -39,6 +39,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  // This effect handles the theme based on the user profile
+  useEffect(() => {
+    if (currentUser && isDataLoaded) {
+        const theme = users[currentUser].theme;
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+    }
+  }, [currentUser, users, isDataLoaded]);
 
   useEffect(() => {
     if (isClient && isDataLoaded) {
@@ -52,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="w-20 h-20 border-8 border-t-primary border-muted rounded-full animate-spin"></div>
       </div>
     );

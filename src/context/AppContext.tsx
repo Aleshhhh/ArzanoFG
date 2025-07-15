@@ -98,13 +98,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   // Effect to handle theme changes without debouncing
   useEffect(() => {
-    if(data.currentUser) {
+    if(isDataLoaded && data.currentUser) {
         const theme = data.users[data.currentUser].theme;
         document.documentElement.classList.toggle('dark', theme === 'dark');
-    } else {
+    } else if (!data.currentUser) {
         document.documentElement.classList.remove('dark');
     }
-  }, [data.currentUser, data.users]);
+  }, [data.currentUser, data.users, isDataLoaded]);
 
 
   const setCurrentUser = (user: UserProfile | null) => {
