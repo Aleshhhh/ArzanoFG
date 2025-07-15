@@ -5,8 +5,7 @@ import { useAppContext } from '@/context/AppContext';
 import { useRouter, usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Heart, Calendar, Image as ImageIcon, Trophy, Sparkles, LogOut, User, Power, Settings } from 'lucide-react';
+import { Heart, Calendar, Image as ImageIcon, Trophy, Sparkles, LogOut, User } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { Sidebar, SidebarBody, SidebarLink, Logo, LogoIcon } from '@/components/ui/sidebar';
 import Link from 'next/link';
@@ -20,7 +19,7 @@ const navItems = [
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser, users, setCurrentUser, isDataLoaded, setTheme } = useAppContext();
+  const { currentUser, users, setCurrentUser, isDataLoaded } = useAppContext();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [currentUser, isDataLoaded, router]);
   
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && users) {
       document.documentElement.classList.toggle('dark', users[currentUser].theme === 'dark');
     }
   }, [currentUser, users]);

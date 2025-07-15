@@ -119,8 +119,10 @@ export const MobileSidebar = ({
         )}
         {...props}
       >
-        <LogoIcon />
-        <div className="flex justify-end z-20 w-full">
+        <div className="flex-1 w-12">
+            <LogoIcon />
+        </div>
+        <div className="flex justify-end z-20">
           <Menu
             className="text-foreground"
             onClick={() => setOpen(!open)}
@@ -170,12 +172,12 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-4 hover:bg-secondary rounded-lg group/sidebar py-3 px-3",
+        "flex items-center justify-start gap-4 hover:bg-secondary rounded-lg group/sidebar p-3",
         className
       )}
       {...props}
     >
-      <div className="text-primary group-hover/sidebar:text-primary-foreground transition-colors">
+      <div className={cn("text-primary group-hover/sidebar:text-primary-foreground transition-colors", !open && "w-full flex justify-center")}>
         {link.icon}
       </div>
 
