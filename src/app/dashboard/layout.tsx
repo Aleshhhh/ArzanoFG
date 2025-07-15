@@ -91,11 +91,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 label: profileName,
                 href: "#",
                 icon: (
-                  <Avatar className="h-7 w-7 shrink-0">
-                    <AvatarFallback className="bg-primary/20 text-primary font-bold text-xs">
-                        {profileInitial}
-                    </AvatarFallback>
-                  </Avatar>
+                  open ? (
+                    <Avatar className="h-7 w-7 shrink-0">
+                      <AvatarFallback className="bg-primary/20 text-primary font-bold text-xs">
+                          {profileInitial}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <User className="h-5 w-5 shrink-0" />
+                  )
                 ),
               }}
             />
