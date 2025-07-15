@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,9 +69,11 @@ export default function GalleryPage() {
     });
   };
   
-  const sortedPhotos = [...photos]
-    .filter(p => p.imageDataUrl) // Filtra le foto con imageDataUrl valido
-    .sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+  const sortedPhotos = useMemo(() => {
+    return [...photos]
+      .filter(p => p.imageDataUrl) 
+      .sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+  }, [photos]);
 
   return (
     <div className="space-y-8">

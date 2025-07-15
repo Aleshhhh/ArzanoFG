@@ -34,18 +34,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
-    if (isClient && isDataLoaded && !currentUser) {
-      router.replace('/');
+    if (isClient && isDataLoaded) {
+      if (!currentUser) {
+        router.replace('/');
+      } else {
+        setIsLoading(false);
+      }
     }
   }, [currentUser, isDataLoaded, router, isClient]);
 
-  if (!isClient || !isDataLoaded || !currentUser) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="w-20 h-20 border-8 border-t-primary border-muted rounded-full animate-spin"></div>
