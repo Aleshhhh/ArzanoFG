@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -83,22 +84,22 @@ export default function MilestonesPage() {
             <p className="text-xs text-muted-foreground">dal 25 Agosto 2024</p>
           </CardContent>
         </Card>
-        <Card className="bg-card/50 backdrop-blur-lg">
+        <Card className="bg-card/50 backdrop-blur-lg flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Giorni Totali Insieme</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow flex flex-col justify-center">
             <div className="text-6xl font-bold font-headline">{totalDaysTogether}</div>
             <p className="text-xs text-muted-foreground">giorni totali segnati come 'Insieme'!</p>
           </CardContent>
         </Card>
-        <Card className="bg-card/50 backdrop-blur-lg">
+        <Card className="bg-card/50 backdrop-blur-lg flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Mesi Completi</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow flex flex-col justify-center">
             <div className="text-6xl font-bold font-headline">{completeMonths}</div>
             <p className="text-xs text-muted-foreground">Ogni "mese" è un set di 31 giorni unici passati insieme.</p>
           </CardContent>
@@ -130,3 +131,4 @@ export default function MilestonesPage() {
     </div>
   );
 }
+
