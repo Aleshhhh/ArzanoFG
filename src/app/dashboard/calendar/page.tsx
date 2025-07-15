@@ -36,7 +36,6 @@ type EditingEventState = {
   title: string;
   description: string;
   tags: string;
-  // For UI state management before saving
   currentPhotoIds: string[]; 
   newPhotoFiles: File[];
   newPhotoPreviews: string[];
@@ -296,7 +295,7 @@ export default function CalendarPage() {
         </div>
       </div>
       
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} modal={false}>
         <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-lg">
             <DialogHeader>
                 <DialogTitle className="font-headline text-2xl">{editingEvent?.id ? 'Modifica ricordo' : 'Aggiungi un nuovo ricordo'}</DialogTitle>
