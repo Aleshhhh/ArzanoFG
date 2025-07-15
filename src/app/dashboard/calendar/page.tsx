@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -43,6 +44,7 @@ export default function CalendarPage() {
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -232,7 +234,7 @@ export default function CalendarPage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="date">Data</Label>
-                        <Popover>
+                        <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                 variant={"outline"}
@@ -249,7 +251,10 @@ export default function CalendarPage() {
                                 <Calendar
                                     mode="single"
                                     selected={editingEvent.date}
-                                    onSelect={(date) => handleFormChange('date', date)}
+                                    onSelect={(date) => {
+                                        handleFormChange('date', date)
+                                        setIsDatePopoverOpen(false)
+                                    }}
                                     initialFocus
                                     locale={it}
                                 />
