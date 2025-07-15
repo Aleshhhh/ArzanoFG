@@ -41,14 +41,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   useEffect(() => {
-    if (isClient && isDataLoaded) {
+    if (isDataLoaded) { // Only check user when data is loaded
       if (!currentUser) {
         router.replace('/');
       } else {
         setIsLoading(false);
       }
     }
-  }, [currentUser, isDataLoaded, router, isClient]);
+  }, [currentUser, isDataLoaded, router]);
 
   if (!isClient || isLoading) {
     return (
@@ -69,7 +69,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-background">
+      <div className="flex min-h-screen">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
