@@ -31,7 +31,7 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
       <div className={cn("flex items-center justify-center w-full", className)}>
         <label
           htmlFor={id}
-          className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-card/50 hover:bg-secondary border-primary/50 hover:border-primary transition-colors"
+          className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted border-primary/50 hover:border-primary transition-colors"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
