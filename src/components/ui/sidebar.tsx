@@ -90,11 +90,11 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0 rounded-lg",
+          "h-full px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0",
           className
         )}
         animate={{
-          width: animate ? (open ? "300px" : "70px") : "300px",
+          width: animate ? (open ? "300px" : "80px") : "300px",
         }}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -173,13 +173,13 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start group/sidebar transition-colors duration-200 rounded-lg",
-        className?.includes('bg-secondary') ? "bg-secondary" : "hover:bg-secondary",
+        "flex items-center group/sidebar transition-colors duration-200 rounded-lg h-12",
+        className?.includes('bg-secondary') ? "" : "hover:bg-secondary/50",
         className
       )}
       {...props}
     >
-      <div className="w-[54px] h-[54px] flex-shrink-0 flex items-center justify-center">
+      <div className={cn("grid place-content-center flex-shrink-0 w-[64px] h-full rounded-lg", className?.includes('bg-secondary') ? "bg-secondary" : "")}>
         {link.icon}
       </div>
       <motion.span
