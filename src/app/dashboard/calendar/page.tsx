@@ -1,21 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { format, parseISO, isSameDay } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Calendar as CalendarIcon, PlusCircle, Image as ImageIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, PlusCircle, Image as ImageIcon, Plus, Tag, Calendar as CalendarIconComponent } from 'lucide-react';
 
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-  SheetClose,
-} from '@/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { FileInput } from '@/components/ui/file-input';
+import { Badge } from '@/components/ui/badge';
 
 const initialEventState = {
   id: null,
@@ -41,7 +42,7 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
 
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -62,14 +63,14 @@ export default function CalendarPage() {
     }
   };
 
-  const handleOpenAddSheet = () => {
+  const handleOpenAddDialog = () => {
     setEditingEvent({ ...initialEventState, date: selectedDate || new Date() });
     setPhotoFile(null);
     setPhotoPreview(null);
-    setIsSheetOpen(true);
+    setIsDialogOpen(true);
   };
   
-  const handleOpenEditSheet = (event: AppEvent) => {
+  const handleOpenEditDialog = (event: AppEvent) => {
     const eventPhoto = event.photoId ? photos.find(p => p.id === event.photoId) : null;
     setEditingEvent({
         ...event,
@@ -78,7 +79,7 @@ export default function CalendarPage() {
     });
     setPhotoFile(null);
     setPhotoPreview(eventPhoto?.imageDataUrl || null);
-    setIsSheetOpen(true);
+    setIsDialogOpen(true);
   }
 
   const handleFormChange = (field: string, value: any) => {
@@ -125,88 +126,106 @@ export default function CalendarPage() {
         }
     }
     
-    setIsSheetOpen(false);
+    setIsDialogOpen(false);
   };
   
   const eventDays = events.map(e => parseISO(e.date));
 
   return (
     <>
-      <div className="grid gap-8 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-3">
-        <div className="md:col-span-2 lg:col-span-3 xl:col-span-2 space-y-8">
-          <Card className="bg-card/50 backdrop-blur-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-3xl">Il Nostro Calendario</CardTitle>
-              <CardDescription>Seleziona un giorno per vedere i tuoi ricordi.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md"
-                locale={it}
-                modifiers={{ event: eventDays }}
-                modifiersStyles={{
-                    event: {
-                        border: "2px solid hsl(var(--primary))",
-                        color: "hsl(var(--primary-foreground))",
-                        backgroundColor: "hsl(var(--primary) / 0.2)"
-                    }
-                }}
-              />
-            </CardContent>
-          </Card>
-        </div>
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[2fr_3fr]">
+        <Card className="bg-card/50 backdrop-blur-lg">
+          <CardHeader>
+            <CardTitle className="font-headline text-3xl">Il Nostro Calendario</CardTitle>
+            <CardDescription>Seleziona un giorno per vedere i tuoi ricordi.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md"
+              locale={it}
+              modifiers={{ event: eventDays }}
+              modifiersStyles={{
+                  event: {
+                      border: "2px solid hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
+                      backgroundColor: "hsl(var(--primary) / 0.2)"
+                  }
+              }}
+            />
+          </CardContent>
+        </Card>
 
-        <div className="md:col-span-1 lg:col-span-2 xl:col-span-1 space-y-8">
+        <div className="space-y-4">
           <Card className="lg:col-span-1 bg-card/50 backdrop-blur-lg">
             <CardHeader>
               <CardTitle className="font-headline text-2xl capitalize">
-                {selectedDate ? format(selectedDate, 'd MMMM yyyy', { locale: it }) : 'Seleziona una data'}
+                {selectedDate ? format(selectedDate, 'EEEE d MMMM yyyy', { locale: it }) : 'Seleziona una data'}
               </CardTitle>
               <CardDescription>Eventi di questo giorno</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+          </Card>
+          
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
               {selectedDayEvents.length > 0 ? (
                 selectedDayEvents.map((event) => {
                   const eventPhoto = event.photoId ? photos.find(p => p.id === event.photoId) : null;
+                  const mainTag = event.tags[0];
+                  const extraTagsCount = event.tags.length - 1;
                   return (
-                      <div key={event.id} onClick={() => handleOpenEditSheet(event)} className="p-3 bg-secondary rounded-lg space-y-2 cursor-pointer hover:bg-muted transition-colors">
-                          {eventPhoto && (
-                              <div className="relative aspect-video w-full rounded-md overflow-hidden">
-                                  <Image src={eventPhoto.imageDataUrl} alt={event.title} layout="fill" objectFit="cover" />
+                      <Card key={event.id} onClick={() => handleOpenEditDialog(event)} className="bg-secondary hover:bg-muted/80 transition-colors cursor-pointer group flex flex-col h-full">
+                          <CardHeader className="flex-row items-center justify-between pb-2">
+                             <div className="text-sm font-semibold text-muted-foreground capitalize">{format(parseISO(event.date), 'd MMM', { locale: it })}</div>
+                             {mainTag && (
+                                <div className="flex items-center gap-1">
+                                    <Badge variant="outline" className="border-primary/50 bg-primary/20 text-primary-foreground">{mainTag}</Badge>
+                                    {extraTagsCount > 0 && <Badge variant="secondary" className="px-2">+{extraTagsCount}</Badge>}
+                                </div>
+                             )}
+                          </CardHeader>
+                          <CardContent className="flex-grow flex flex-col justify-between pt-2">
+                              {eventPhoto && (
+                                  <div className="relative aspect-video w-full rounded-md overflow-hidden mb-3">
+                                      <Image src={eventPhoto.imageDataUrl} alt={event.title} layout="fill" objectFit="cover" className="group-hover:scale-105 transition-transform" />
+                                  </div>
+                              )}
+                              <div className={cn(!eventPhoto && "flex-grow flex flex-col justify-center")}>
+                                  <h3 className="font-headline text-lg font-semibold leading-tight">{event.title}</h3>
+                                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{event.description}</p>
                               </div>
-                          )}
-                          <div>
-                              <h3 className="font-semibold">{event.title}</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
-                              {event.tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">
-                                  {event.tags.map(tag => <span key={tag} className="text-xs bg-primary/50 text-primary-foreground px-2 py-0.5 rounded-full">{tag}</span>)}
-                              </div>}
-                          </div>
-                      </div>
+                          </CardContent>
+                      </Card>
                   )
                 })
               ) : (
-                <p className="text-muted-foreground italic">Nessun ricordo per questo giorno.</p>
+                <Card className="border-dashed border-2 bg-transparent col-span-full">
+                    <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground">
+                       <CalendarIconComponent className="w-12 h-12 mb-2" />
+                       <h3 className="font-headline text-xl">Nessun ricordo</h3>
+                       <p className="text-sm">Aggiungi un nuovo ricordo per questo giorno.</p>
+                    </CardContent>
+                </Card>
               )}
 
-              <Button className="w-full mt-4" onClick={handleOpenAddSheet}>
-                <PlusCircle className="mr-2 h-4 w-4" /> Aggiungi Ricordo
-              </Button>
-            </CardContent>
-          </Card>
+             <Card onClick={handleOpenAddDialog} className="border-dashed border-2 bg-transparent hover:border-primary hover:text-primary transition-colors cursor-pointer">
+                <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center text-muted-foreground hover:text-primary">
+                    <PlusCircle className="w-12 h-12" />
+                    <span className="mt-2 font-semibold">Aggiungi Ricordo</span>
+                </CardContent>
+             </Card>
+            </div>
         </div>
       </div>
       
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="sm:max-w-md bg-card/80 backdrop-blur-lg overflow-y-auto">
-            <SheetHeader>
-                <SheetTitle className="font-headline text-2xl">{editingEvent?.id ? 'Modifica ricordo' : 'Aggiungi un nuovo ricordo'}</SheetTitle>
-            </SheetHeader>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-lg">
+            <DialogHeader>
+                <DialogTitle className="font-headline text-2xl">{editingEvent?.id ? 'Modifica ricordo' : 'Aggiungi un nuovo ricordo'}</DialogTitle>
+            </DialogHeader>
             {editingEvent && (
-                <div className="grid gap-6 py-6">
+                <div className="grid gap-6 py-6 max-h-[70vh] overflow-y-auto pr-4">
                     <div className="space-y-2">
                         <Label htmlFor="title">Titolo</Label>
                         <Input id="title" value={editingEvent.title} onChange={(e) => handleFormChange('title', e.target.value)} />
@@ -275,14 +294,14 @@ export default function CalendarPage() {
                     </div>
                 </div>
             )}
-            <SheetFooter>
-                <SheetClose asChild>
+            <DialogFooter>
+                <DialogClose asChild>
                     <Button variant="outline">Annulla</Button>
-                </SheetClose>
+                </DialogClose>
                 <Button onClick={handleSaveEvent}>Salva ricordo</Button>
-            </SheetFooter>
-        </SheetContent>
-      </Sheet>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
