@@ -56,7 +56,6 @@ export default function CalendarPage() {
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EditingEventState>(null);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
@@ -133,6 +132,12 @@ export default function CalendarPage() {
 
   const handleFormChange = (field: string, value: any) => {
     setEditingEvent((prev) => (prev ? { ...prev, [field]: value } : null));
+  };
+  
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    if (range) {
+      handleFormChange('dateRange', range);
+    }
   };
 
   const handleSaveEvent = async () => {
@@ -322,7 +327,7 @@ export default function CalendarPage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="date">Data</Label>
-                        <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
+                        <Popover>
                             <PopoverTrigger asChild>
                                 <Button
                                 variant={"outline"}
@@ -352,14 +357,7 @@ export default function CalendarPage() {
                                     mode="range"
                                     defaultMonth={editingEvent.dateRange?.from}
                                     selected={editingEvent.dateRange}
-                                    onSelect={(range) => {
-                                      if (range) {
-                                        handleFormChange('dateRange', range);
-                                      }
-                                      if (range?.from && range?.to) {
-                                        setIsDatePopoverOpen(false);
-                                      }
-                                    }}
+                                    onSelect={handleDateRangeSelect}
                                     numberOfMonths={1}
                                     locale={it}
                                 />
@@ -412,5 +410,3 @@ export default function CalendarPage() {
     </>
   );
 }
-
-    
