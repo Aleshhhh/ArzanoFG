@@ -16,6 +16,8 @@ interface SidebarContextProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   animate: boolean;
+  collapsedWidth: string;
+  expandedWidth: string;
 }
 
 const SidebarContext = createContext<SidebarContextProps | undefined>(
@@ -35,11 +37,15 @@ export const SidebarProvider = ({
   open: openProp,
   setOpen: setOpenProp,
   animate = true,
+  collapsedWidth,
+  expandedWidth,
 }: {
   children: React.ReactNode;
   open?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   animate?: boolean;
+  collapsedWidth: string;
+  expandedWidth: string;
 }) => {
   const [openState, setOpenState] = useState(false);
 
@@ -47,7 +53,7 @@ export const SidebarProvider = ({
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
 
   return (
-    <SidebarContext.Provider value={{ open, setOpen, animate: animate }}>
+    <SidebarContext.Provider value={{ open, setOpen, animate, collapsedWidth, expandedWidth }}>
       {children}
     </SidebarContext.Provider>
   );
@@ -58,14 +64,18 @@ export const Sidebar = ({
   open,
   setOpen,
   animate,
+  collapsedWidth = "70px",
+  expandedWidth = "300px"
 }: {
   children: React.ReactNode;
   open?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   animate?: boolean;
+  collapsedWidth?: string,
+  expandedWidth?: string
 }) => {
   return (
-    <SidebarProvider open={open} setOpen={setOpen} animate={animate}>
+    <SidebarProvider open={open} setOpen={setOpen} animate={animate} collapsedWidth={collapsedWidth} expandedWidth={expandedWidth}>
       {children}
     </SidebarProvider>
   );
@@ -85,7 +95,7 @@ export const DesktopSidebar = ({
   children,
   ...props
 }: React.ComponentProps<typeof motion.div>) => {
-  const { open, setOpen, animate } = useSidebar();
+  const { open, setOpen, animate, collapsedWidth, expandedWidth } = useSidebar();
   return (
     <>
       <motion.div
@@ -94,7 +104,7 @@ export const DesktopSidebar = ({
           className
         )}
         animate={{
-          width: animate ? (open ? "300px" : "90px") : "300px",
+          width: animate ? (open ? expandedWidth : collapsedWidth) : expandedWidth,
         }}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -168,35 +178,44 @@ export const SidebarLink = ({
   className?: string;
   [key: string]: any;
 }) => {
-  const { open, animate } = useSidebar();
+  const { open } = useSidebar();
   const isSelected = className?.includes('bg-secondary');
 
   return (
     <Link
       href={link.href}
       className={cn(
-        "flex items-center group/sidebar transition-colors duration-200 rounded-lg h-12",
+        "flex items-center justify-start gap-4 group/sidebar transition-colors duration-200 rounded-lg h-14 relative",
         !isSelected && "hover:bg-secondary/50",
-        open && isSelected && "bg-secondary",
-        className
       )}
       {...props}
     >
-      <div className={cn(
-          "grid place-content-center flex-shrink-0 w-[64px] h-full",
-          !open && isSelected && "bg-secondary rounded-lg"
-      )}>
+        {isSelected && (
+          <motion.div
+            layoutId="sidebar-highlight"
+            className="absolute h-14 w-14 bg-secondary rounded-lg z-0"
+            initial={false}
+            animate={{
+              width: open ? '100%' : '56px',
+              height: '56px',
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          />
+        )}
+      <div className="w-14 h-14 flex items-center justify-center shrink-0 z-10">
         {link.icon}
       </div>
+
       <motion.span
         animate={{
-          opacity: open || !animate ? 1 : 0,
-          width: open || !animate ? "auto" : 0,
+          opacity: open ? 1 : 0,
+          x: open ? 0 : -10
         }}
         transition={{
-          duration: 0.15,
+          duration: 0.2,
+          delay: 0.1
         }}
-        className="text-foreground text-sm whitespace-pre overflow-hidden"
+        className="text-foreground text-sm whitespace-pre overflow-hidden z-10"
       >
         {link.label}
       </motion.span>
@@ -206,19 +225,29 @@ export const SidebarLink = ({
 
 
 export const Logo = () => {
+  const { open } = useSidebar();
   return (
     <Link
       href="/dashboard"
       className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
     >
-      <div className="h-5 w-6 bg-primary dark:bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="font-headline font-medium text-foreground dark:text-white whitespace-pre text-lg"
-      >
-        Arzano Foggia
-      </motion.span>
+      <motion.div
+        layout
+        className="h-5 w-6 bg-primary dark:bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" 
+      />
+      <AnimatePresence>
+        {open && (
+           <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2, delay: 0.1}}
+            className="font-headline font-medium text-foreground dark:text-white whitespace-pre text-lg"
+          >
+            Arzano Foggia
+          </motion.span>
+        )}
+      </AnimatePresence>
     </Link>
   );
 };

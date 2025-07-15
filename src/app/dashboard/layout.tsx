@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div
       className="mx-auto flex w-full flex-1 flex-col overflow-hidden md:flex-row h-screen"
     >
-      <Sidebar open={open} setOpen={setOpen}>
+      <Sidebar open={open} setOpen={setOpen} collapsedWidth="90px" expandedWidth="300px">
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
             {open ? <Logo /> : <LogoIcon />}
