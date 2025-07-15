@@ -21,15 +21,12 @@ export default function MilestonesPage() {
     
     const years = differenceInYears(now, START_DATE);
     
-    let totalMonths = differenceInMonths(now, START_DATE);
-    if(now.getDate() < START_DATE.getDate()) {
-        totalMonths--;
-    }
+    const totalMonths = differenceInMonths(now, START_DATE);
     
     setTimeTogether({ years, months: totalMonths });
   }, []);
 
-  const { totalDaysTogether, completeMonths } = useMemo(() => {
+  const { totalDaysTogether, completeMonths, uniqueDaysCount, allUniqueDays } = useMemo(() => {
     let totalDays = 0;
     const uniqueDayNumbers = new Set<number>();
 
@@ -43,19 +40,17 @@ export default function MilestonesPage() {
       }
     }
     
-    const calculatedCompleteMonths = Math.floor(uniqueDayNumbers.size / 31);
+    const calculatedCompleteMonths = Math.floor(totalDays / 31);
     
     return {
       totalDaysTogether: totalDays,
       completeMonths: calculatedCompleteMonths,
+      uniqueDaysCount: uniqueDayNumbers.size,
+      allUniqueDays: Array.from(uniqueDayNumbers).sort((a,b) => a - b)
     };
   }, [checkedDays]);
 
   const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1;
-  const daysInCurrentMonth = getDaysInMonth(today);
-  const checkedDaysForCurrentMonth = (isClient && checkedDays[currentYear]?.[currentMonth]) || [];
   
   if (!isClient) {
     return (
@@ -73,48 +68,48 @@ export default function MilestonesPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-card/50 backdrop-blur-lg">
+        <Card className="bg-card/50">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Tempo Insieme</CardTitle>
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-4">
             <div className="text-4xl font-bold font-headline">{timeTogether.years} <span className="text-2xl text-muted-foreground">Anni</span></div>
             <div className="text-4xl font-bold font-headline">{timeTogether.months} <span className="text-2xl text-muted-foreground">Mesi</span></div>
             <p className="text-xs text-muted-foreground">dal 25 Agosto 2024</p>
           </CardContent>
         </Card>
-        <Card className="bg-card/50 backdrop-blur-lg flex flex-col">
+        <Card className="bg-card/50 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Giorni Totali Insieme</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="flex-grow flex flex-col justify-center">
+          <CardContent className="flex-grow flex flex-col justify-center items-center gap-2">
             <div className="text-6xl font-bold font-headline">{totalDaysTogether}</div>
-            <p className="text-xs text-muted-foreground">giorni totali segnati come 'Insieme'!</p>
+            <p className="text-xs text-muted-foreground text-center">giorni totali segnati come 'Insieme'!</p>
           </CardContent>
         </Card>
-        <Card className="bg-card/50 backdrop-blur-lg flex flex-col">
+        <Card className="bg-card/50 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Mesi Completi</CardTitle>
             <CalendarHeart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="flex-grow flex flex-col justify-center">
+          <CardContent className="flex-grow flex flex-col justify-center items-center gap-2">
             <div className="text-6xl font-bold font-headline">{completeMonths}</div>
-            <p className="text-xs text-muted-foreground">Ogni "mese" è un set di 31 giorni unici passati insieme.</p>
+            <p className="text-xs text-muted-foreground text-center">Ogni "mese" è un set di 31 giorni totali passati insieme.</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-card/50 backdrop-blur-lg">
+      <Card className="bg-card/50">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">Giorni 'Insieme' Questo Mese</CardTitle>
-          <p className="text-muted-foreground text-sm capitalize">Una checklist dei nostri giorni insieme a {format(today, 'MMMM yyyy', { locale: it })}.</p>
+          <CardTitle className="font-headline text-2xl">Giorni Unici Insieme ({uniqueDaysCount}/31)</CardTitle>
+          <p className="text-muted-foreground text-sm">Una checklist dei giorni del mese che abbiamo passato insieme almeno una volta.</p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-5 sm:grid-cols-7 md:grid-cols-10 lg:grid-cols-11 gap-2">
-            {Array.from({ length: daysInCurrentMonth }, (_, i) => i + 1).map((day) => {
-              const isChecked = checkedDaysForCurrentMonth.includes(day);
+            {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
+              const isChecked = allUniqueDays.includes(day);
               return (
                 <div
                   key={day}
@@ -131,4 +126,3 @@ export default function MilestonesPage() {
     </div>
   );
 }
-
