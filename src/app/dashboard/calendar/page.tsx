@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { format, parseISO, isWithinInterval, startOfDay, eachDayOfInterval } from 'date-fns';
+import { useState, useMemo } from 'react';
+import { format, parseISO, isWithinInterval, startOfDay, eachDayOfInterval, getMonth, getYear, isSameMonth, isSameYear } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Calendar as CalendarIcon, PlusCircle, Image as ImageIcon, X } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { FileInput } from '@/components/ui/file-input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type EditingEventState = {
   id: string | null;
@@ -41,6 +42,9 @@ type EditingEventState = {
   newPhotoFiles: File[];
   newPhotoPreviews: string[];
 };
+
+type FilterMode = 'day' | 'month' | 'year' | 'all';
+
 
 const getInitialEventState = (date: Date): EditingEventState => ({
   id: null,
@@ -60,15 +64,36 @@ export default function CalendarPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EditingEventState | null>(null);
+  const [filterMode, setFilterMode] = useState<FilterMode>('day');
   
-  const selectedDayEvents = selectedDate
-    ? events.filter((event) => {
-        const start = startOfDay(parseISO(event.startDate));
-        const end = event.endDate ? startOfDay(parseISO(event.endDate)) : start;
-        const selected = startOfDay(selectedDate);
-        return isWithinInterval(selected, { start, end });
-      })
-    : [];
+  const filteredEvents = useMemo(() => {
+    if (!selectedDate) return [];
+
+    const selectedDay = startOfDay(selectedDate);
+    
+    switch (filterMode) {
+      case 'day':
+        return events.filter((event) => {
+          const start = startOfDay(parseISO(event.startDate));
+          const end = event.endDate ? startOfDay(parseISO(event.endDate)) : start;
+          return isWithinInterval(selectedDay, { start, end });
+        });
+      case 'month':
+        return events.filter((event) => {
+            const eventDate = parseISO(event.startDate);
+            return isSameMonth(selectedDay, eventDate);
+        }).sort((a,b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
+      case 'year':
+        return events.filter((event) => {
+            const eventDate = parseISO(event.startDate);
+            return isSameYear(selectedDay, eventDate);
+        }).sort((a,b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
+      case 'all':
+        return [...events].sort((a,b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
+      default:
+        return [];
+    }
+  }, [events, selectedDate, filterMode]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && editingEvent) {
@@ -205,6 +230,13 @@ export default function CalendarPage() {
     const end = e.endDate ? parseISO(e.endDate) : start;
     return eachDayOfInterval({ start, end });
   });
+  
+  const filterTitles = {
+    day: `Eventi del ${selectedDate ? format(selectedDate, 'd MMMM', { locale: it }) : ''}`,
+    month: `Eventi di ${selectedDate ? format(selectedDate, 'MMMM yyyy', { locale: it }) : ''}`,
+    year: `Eventi del ${selectedDate ? format(selectedDate, 'yyyy', { locale: it }) : ''}`,
+    all: 'Tutti gli eventi'
+  };
 
   const existingPhotoPreviews = editingEvent?.currentPhotoIds.map(id => photos.find(p => p.id === id)).filter(Boolean) as Photo[];
 
@@ -239,22 +271,31 @@ export default function CalendarPage() {
           <Card className="lg:col-span-1 bg-card/50 backdrop-blur-lg">
             <CardHeader>
               <CardTitle className="font-headline text-2xl capitalize">
-                {selectedDate ? format(selectedDate, 'EEEE d MMMM yyyy', { locale: it }) : 'Seleziona una data'}
+                {filterTitles[filterMode]}
               </CardTitle>
-              <CardDescription>Eventi di questo giorno</CardDescription>
+              <CardDescription>
+                <Tabs value={filterMode} onValueChange={(value) => setFilterMode(value as FilterMode)} className="w-full mt-2">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="day">Giorno</TabsTrigger>
+                    <TabsTrigger value="month">Mese</TabsTrigger>
+                    <TabsTrigger value="year">Anno</TabsTrigger>
+                    <TabsTrigger value="all">Sempre</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardDescription>
             </CardHeader>
           </Card>
           
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-              {selectedDayEvents.length > 0 ? (
-                selectedDayEvents.map((event) => {
+              {filteredEvents.length > 0 ? (
+                filteredEvents.map((event) => {
                   const eventPhoto = event.photoIds.length > 0 ? photos.find(p => p.id === event.photoIds[0]) : null;
                   const mainTag = event.tags[0];
                   const extraTagsCount = event.tags.length - 1;
                   return (
                       <Card key={event.id} onClick={() => handleOpenEditDialog(event)} className="bg-secondary hover:bg-muted/80 transition-colors cursor-pointer group flex flex-col h-full">
                           <CardHeader className="flex-row items-center justify-between pb-2">
-                             <div className="text-sm font-semibold text-muted-foreground capitalize">{format(parseISO(event.startDate), 'd MMM', { locale: it })}</div>
+                             <div className="text-sm font-semibold text-muted-foreground capitalize">{format(parseISO(event.startDate), 'd MMM yyyy', { locale: it })}</div>
                              {mainTag && (
                                 <div className="flex items-center gap-1">
                                     <Badge variant="outline" className="border-primary/50 bg-primary/20 text-primary-foreground">{mainTag}</Badge>
@@ -405,6 +446,8 @@ export default function CalendarPage() {
     </>
   );
 }
+
+    
 
     
 
