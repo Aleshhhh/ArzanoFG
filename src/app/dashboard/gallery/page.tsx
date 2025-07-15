@@ -30,6 +30,7 @@ export default function GalleryPage() {
   const [newPhoto, setNewPhoto] = useState<{ description: string; file: File | null }>({ description: '', file: null });
   const [preview, setPreview] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -42,6 +43,11 @@ export default function GalleryPage() {
       reader.readAsDataURL(file);
     }
   };
+  
+  const resetForm = () => {
+      setNewPhoto({ description: '', file: null });
+      setPreview(null);
+  }
 
   const handleAddPhoto = () => {
     if (!newPhoto.file || !preview) {
@@ -61,13 +67,13 @@ export default function GalleryPage() {
     };
     addPhoto(photo);
 
-    // Reset form
-    setNewPhoto({ description: '', file: null });
-    setPreview(null);
     toast({
         title: "Foto Aggiunta!",
         description: "Il tuo nuovo ricordo è stato aggiunto alla galleria."
     });
+    
+    setIsDialogOpen(false);
+    resetForm();
   };
   
   const sortedPhotos = useMemo(() => {
@@ -83,7 +89,7 @@ export default function GalleryPage() {
           <h1 className="font-headline text-3xl md:text-4xl">La Nostra Galleria</h1>
           <p className="text-muted-foreground mt-1">Una collezione dei nostri momenti più preziosi.</p>
         </div>
-        <Dialog onOpenChange={() => {setPreview(null); setNewPhoto({ description: '', file: null })}}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm()}} modal={false}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" /> Aggiungi Foto
@@ -94,28 +100,26 @@ export default function GalleryPage() {
               <DialogTitle className="font-headline text-2xl">Aggiungi una nuova foto</DialogTitle>
             </DialogHeader>
             <ScrollArea className="-mx-6 px-6 max-h-[70vh]">
-              <div className="space-y-6 py-4 px-4">
-                <div className="space-y-2">
-                  <Label htmlFor="photo-file">Foto</Label>
-                  <FileInput
-                    id="photo-file"
-                    accept="image/*"
-                    onFileChange={handleFileChange}
-                  />
+                <div className="space-y-6 py-4 px-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="photo-file">Foto</Label>
+                      <FileInput
+                        id="photo-file"
+                        accept="image/*"
+                        onFileChange={handleFileChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Descrizione</Label>
+                      <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
+                    </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Descrizione</Label>
-                  <Textarea id="description" value={newPhoto.description} onChange={(e) => setNewPhoto({ ...newPhoto, description: e.target.value })} />
-                </div>
-              </div>
             </ScrollArea>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">Annulla</Button>
               </DialogClose>
-              <DialogClose asChild>
-                <Button type="submit" onClick={handleAddPhoto}>Salva Foto</Button>
-              </DialogClose>
+              <Button type="submit" onClick={handleAddPhoto}>Salva Foto</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
