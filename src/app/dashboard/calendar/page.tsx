@@ -2,9 +2,10 @@
 'use client';
 
 import { useState } from 'react';
-import { format, parseISO, isWithinInterval, startOfDay } from 'date-fns';
+import { format, parseISO, isWithinInterval, startOfDay, eachDayOfInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Calendar as CalendarIcon, PlusCircle, Image as ImageIcon, X } from 'lucide-react';
+import type { DateRange } from 'react-day-picker';
 
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,8 +29,6 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { FileInput } from '@/components/ui/file-input';
 import { Badge } from '@/components/ui/badge';
-import type { DateRange } from 'react-day-picker';
-import { eachDayOfInterval } from 'date-fns';
 
 type EditingEventState = {
   id: string | null;
@@ -37,18 +36,22 @@ type EditingEventState = {
   title: string;
   description: string;
   tags: string;
-  photoIds: string[];
-} | null;
+  // For UI state management before saving
+  currentPhotoIds: string[]; 
+  newPhotoFiles: File[];
+  newPhotoPreviews: string[];
+};
 
-
-const initialEventState = {
+const getInitialEventState = (date: Date): EditingEventState => ({
   id: null,
-  dateRange: { from: new Date(), to: undefined },
+  dateRange: { from: date, to: date },
   title: '',
   description: '',
   tags: '',
-  photoIds: [],
-};
+  currentPhotoIds: [],
+  newPhotoFiles: [],
+  newPhotoPreviews: [],
+});
 
 export default function CalendarPage() {
   const { events, photos, addEvent, addPhoto, updateEvent, updateCheckedDays } = useAppContext();
@@ -56,9 +59,7 @@ export default function CalendarPage() {
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<EditingEventState>(null);
-  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
-  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
+  const [editingEvent, setEditingEvent] = useState<EditingEventState | null>(null);
   
   const selectedDayEvents = selectedDate
     ? events.filter((event) => {
@@ -70,18 +71,23 @@ export default function CalendarPage() {
     : [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    if (e.target.files && editingEvent) {
       const files = Array.from(e.target.files);
-      const newPhotoFiles = [...photoFiles, ...files];
-      setPhotoFiles(newPhotoFiles);
-
+      const newFiles = [...editingEvent.newPhotoFiles, ...files];
+      
       const newPreviews: string[] = [];
+      let loadedCount = 0;
       files.forEach(file => {
         const reader = new FileReader();
         reader.onloadend = () => {
           newPreviews.push(reader.result as string);
-          if (newPreviews.length === files.length) {
-            setPhotoPreviews(prev => [...prev, ...newPreviews]);
+          loadedCount++;
+          if (loadedCount === files.length) {
+            setEditingEvent(prev => prev ? ({ 
+              ...prev, 
+              newPhotoFiles: newFiles,
+              newPhotoPreviews: [...prev.newPhotoPreviews, ...newPreviews]
+            }) : null);
           }
         };
         reader.readAsDataURL(file);
@@ -89,55 +95,35 @@ export default function CalendarPage() {
     }
   };
 
-  const removePhoto = (index: number) => {
-    const previewToRemove = photoPreviews[index];
-    const newPreviews = photoPreviews.filter((_, i) => i !== index);
-    
-    if (previewToRemove.startsWith('data:')) {
-      const fileIndexToRemove = photoFiles.findIndex(file => {
-        // This is a bit of a hack, but we find the corresponding file to remove
-        return new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                resolve(reader.result === previewToRemove);
-            };
-            if(file) reader.readAsDataURL(file);
-        });
-      });
-      if (fileIndexToRemove !== -1) {
-          const newPhotoFiles = photoFiles.filter((_, i) => i !== fileIndexToRemove);
-          setPhotoFiles(newPhotoFiles);
-      }
-    } else if (editingEvent) {
-      const photoToRemove = photos.find(p => p.imageDataUrl === previewToRemove);
-      if (photoToRemove) {
-        handleFormChange('photoIds', editingEvent.photoIds.filter(id => id !== photoToRemove.id));
-      }
+  const removePhoto = (index: number, type: 'existing' | 'new') => {
+    if (!editingEvent) return;
+    if (type === 'existing') {
+        const newPhotoIds = editingEvent.currentPhotoIds.filter((_, i) => i !== index);
+        setEditingEvent(prev => prev ? ({ ...prev, currentPhotoIds: newPhotoIds }) : null);
+    } else {
+        const newPhotoFiles = editingEvent.newPhotoFiles.filter((_, i) => i !== index);
+        const newPhotoPreviews = editingEvent.newPhotoPreviews.filter((_, i) => i !== index);
+        setEditingEvent(prev => prev ? ({ ...prev, newPhotoFiles, newPhotoPreviews }) : null);
     }
-    setPhotoPreviews(newPreviews);
   };
-
 
   const handleOpenAddDialog = () => {
     const fromDate = selectedDate || new Date();
-    setEditingEvent({ 
-      ...initialEventState, 
-      dateRange: { from: fromDate, to: fromDate } 
-    });
-    setPhotoFiles([]);
-    setPhotoPreviews([]);
+    setEditingEvent(getInitialEventState(fromDate));
     setIsDialogOpen(true);
   };
   
   const handleOpenEditDialog = (event: AppEvent) => {
-    const eventPhotos = event.photoIds.map(id => photos.find(p => p.id === id)).filter(Boolean) as Photo[];
     setEditingEvent({
-        ...event,
+        id: event.id,
         dateRange: { from: parseISO(event.startDate), to: event.endDate ? parseISO(event.endDate) : parseISO(event.startDate) },
-        tags: event.tags.join(', ')
+        title: event.title,
+        description: event.description,
+        tags: event.tags.join(', '),
+        currentPhotoIds: [...event.photoIds],
+        newPhotoFiles: [],
+        newPhotoPreviews: []
     });
-    setPhotoFiles([]);
-    setPhotoPreviews(eventPhotos.map(p => p.imageDataUrl));
     setIsDialogOpen(true);
   }
 
@@ -154,16 +140,15 @@ export default function CalendarPage() {
   const handleSaveEvent = async () => {
     if (!editingEvent?.title || !editingEvent?.dateRange?.from) return;
 
-    let newPhotoIds: string[] = [...(editingEvent.photoIds || [])];
+    let finalPhotoIds = [...editingEvent.currentPhotoIds];
 
-    // Handle new photo uploads
-    if (photoFiles.length > 0) {
-      const uploadPromises = photoFiles.map((file) => {
+    if (editingEvent.newPhotoFiles.length > 0) {
+      const uploadPromises = editingEvent.newPhotoFiles.map((file) => {
         return new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => {
             const newPhoto: Photo = {
-              id: new Date().toISOString() + `-photo-${Math.random()}`,
+              id: `${new Date().toISOString()}-photo-${Math.random()}`,
               date: editingEvent.dateRange.from!.toISOString(),
               imageDataUrl: reader.result as string,
               description: editingEvent.title,
@@ -175,16 +160,10 @@ export default function CalendarPage() {
         });
       });
       const uploadedPhotoIds = await Promise.all(uploadPromises);
-      newPhotoIds.push(...uploadedPhotoIds);
+      finalPhotoIds.push(...uploadedPhotoIds);
     }
     
-    // Combine existing and new photo IDs, filtering by what's left in the previews
-    const finalPhotoIds = photos
-      .filter(p => photoPreviews.includes(p.imageDataUrl))
-      .map(p => p.id);
-
-
-    const tagsArray = editingEvent.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+    const tagsArray = editingEvent.tags.split(',').map(tag => tag.trim()).filter(Boolean);
     
     const eventToSave: AppEvent = {
       id: editingEvent.id || new Date().toISOString(),
@@ -196,11 +175,10 @@ export default function CalendarPage() {
       photoIds: finalPhotoIds
     };
     
-
-    if (editingEvent.id) { // Editing existing event
+    if (editingEvent.id) {
         updateEvent(eventToSave);
         toast({ title: "Ricordo aggiornato!", description: "Le modifiche sono state salvate." });
-    } else { // Adding new event
+    } else {
         addEvent(eventToSave);
         toast({ title: "Ricordo aggiunto!", description: "Il nuovo ricordo è stato salvato." });
     }
@@ -227,6 +205,8 @@ export default function CalendarPage() {
     const end = e.endDate ? parseISO(e.endDate) : start;
     return eachDayOfInterval({ start, end });
   });
+
+  const existingPhotoPreviews = editingEvent?.currentPhotoIds.map(id => photos.find(p => p.id === id)).filter(Boolean) as Photo[];
 
   return (
     <>
@@ -340,9 +320,9 @@ export default function CalendarPage() {
                                 >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
                                 {editingEvent.dateRange?.from ? (
-                                    editingEvent.dateRange.to && editingEvent.dateRange.to.getTime() !== editingEvent.dateRange.from.getTime() ? (
+                                    editingEvent.dateRange.to ? (
                                     <>
-                                        {format(editingEvent.dateRange.from, "d MMMM yyyy", { locale: it })} -{' '}
+                                        {format(editingEvent.dateRange.from, "d MMMM", { locale: it })} -{' '}
                                         {format(editingEvent.dateRange.to, "d MMMM yyyy", { locale: it })}
                                     </>
                                     ) : (
@@ -356,10 +336,10 @@ export default function CalendarPage() {
                             <PopoverContent className="w-auto p-0">
                                 <div className="p-2 border-b">
                                   <div className="text-sm font-medium">
-                                      <span className="text-muted-foreground">Data inizio:</span> {editingEvent.dateRange.from ? format(editingEvent.dateRange.from, 'd MMM yyyy') : '...'}
+                                      <span className="text-muted-foreground">Data inizio:</span> {editingEvent.dateRange.from ? format(editingEvent.dateRange.from, 'd MMM yyyy', {locale: it}) : '...'}
                                   </div>
                                   <div className="text-sm font-medium">
-                                      <span className="text-muted-foreground">Data fine:</span> {editingEvent.dateRange.to ? format(editingEvent.dateRange.to, 'd MMM yyyy') : '...'}
+                                      <span className="text-muted-foreground">Data fine:</span> {editingEvent.dateRange.to ? format(editingEvent.dateRange.to, 'd MMM yyyy', {locale: it}) : '...'}
                                   </div>
                                 </div>
                                 <Calendar
@@ -386,15 +366,18 @@ export default function CalendarPage() {
                     <div className="space-y-2">
                         <Label>Allega foto</Label>
                         <div className="grid grid-cols-3 gap-2">
-                            {photoPreviews.map((preview, index) => (
-                                <div key={index} className="relative w-full h-24 rounded-md overflow-hidden border group">
+                            {existingPhotoPreviews.map((photo, index) => (
+                                <div key={photo.id} className="relative w-full h-24 rounded-md overflow-hidden border group">
+                                    <Image src={photo.imageDataUrl} alt={`Foto ${index + 1}`} layout="fill" objectFit="cover" />
+                                    <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removePhoto(index, 'existing')}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                            {editingEvent.newPhotoPreviews.map((preview, index) => (
+                                <div key={`new-${index}`} className="relative w-full h-24 rounded-md overflow-hidden border group">
                                     <Image src={preview} alt={`Anteprima ${index + 1}`} layout="fill" objectFit="cover" />
-                                    <Button
-                                        variant="destructive"
-                                        size="icon"
-                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={() => removePhoto(index)}
-                                    >
+                                    <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removePhoto(index, 'new')}>
                                         <X className="h-4 w-4" />
                                     </Button>
                                 </div>
