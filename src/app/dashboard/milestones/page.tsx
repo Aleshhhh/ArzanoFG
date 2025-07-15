@@ -23,9 +23,11 @@ export default function MilestonesPage() {
   const { checkedDays, perfectMonthsCount, incrementPerfectMonths } = useAppContext();
   const [timeTogether, setTimeTogether] = useState({ years: 0, months: 0 });
   const [showCongrats, setShowCongrats] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    setIsClient(true);
     const now = new Date();
     
     const years = differenceInYears(now, START_DATE);
@@ -45,6 +47,7 @@ export default function MilestonesPage() {
   const checkedDaysForCurrentMonth = checkedDays[currentYear]?.[currentMonth] || [];
 
   useEffect(() => {
+    if (!isClient) return;
     const isMonthCompleted = checkedDaysForCurrentMonth.length >= daysInCurrentMonth;
     const completedMonthId = `${currentYear}-${currentMonth}`;
     const hasBeenCongratulated = localStorage.getItem(completedMonthId) === 'true';
@@ -58,8 +61,16 @@ export default function MilestonesPage() {
         description: "Avete completato un altro mese insieme!"
       });
     }
-  }, [checkedDaysForCurrentMonth.length, daysInCurrentMonth, incrementPerfectMonths, toast, currentYear, currentMonth]);
+  }, [isClient, checkedDaysForCurrentMonth.length, daysInCurrentMonth, incrementPerfectMonths, toast, currentYear, currentMonth]);
   
+  if (!isClient) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <div className="w-20 h-20 border-8 border-t-primary border-muted rounded-full animate-spin"></div>
+        </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
