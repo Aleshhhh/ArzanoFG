@@ -26,3 +26,11 @@ export interface CheckedDays {
     [month: number]: number[];
   };
 }
+
+export interface AppData {
+  currentUser: UserProfile | null;
+  users: Record<UserProfile, UserPreferences>;
+  events: AppEvent[];
+  photos: Photo[];
+  checkedDays: CheckedDays;
+}

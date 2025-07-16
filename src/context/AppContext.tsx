@@ -1,9 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserProfile, UserPreferences, AppEvent, Photo, CheckedDays } from '@/lib/types';
-
-const APP_STORAGE_KEY = 'amoreEternoData';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { UserProfile, UserPreferences, AppEvent, Photo, CheckedDays, AppData } from '@/lib/types';
+import { loadData, saveData } from '@/lib/actions';
 
 // Helper hook for debouncing
 function useDebounce<T>(value: T, delay: number): T {
@@ -20,15 +19,6 @@ function useDebounce<T>(value: T, delay: number): T {
   }, [value, delay]);
 
   return debouncedValue;
-}
-
-
-interface AppData {
-  currentUser: UserProfile | null;
-  users: Record<UserProfile, UserPreferences>;
-  events: AppEvent[];
-  photos: Photo[];
-  checkedDays: CheckedDays;
 }
 
 interface AppContextType extends AppData {
@@ -57,78 +47,34 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState<AppData>(defaultState);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const debouncedData = useDebounce(data, 500); // Debounce data changes
+  const debouncedData = useDebounce(data, 500); 
 
-  // Effect to load data from localStorage on initial mount
   useEffect(() => {
-    try {
-      const storedData = localStorage.getItem(APP_STORAGE_KEY);
-      if (storedData) {
-        let parsedData = JSON.parse(storedData);
-
-        // --- Data Migration ---
-        // Migrate old events with 'date' to new events with 'startDate' and 'endDate'
-        if (parsedData.events && parsedData.events.some((e: any) => 'date' in e)) {
-          parsedData.events = parsedData.events.map((e: any) => {
-            if ('date' in e) {
-              const { date, photoId, ...rest } = e;
-              return {
-                ...rest,
-                startDate: date,
-                endDate: null,
-                photoIds: photoId ? [photoId] : [],
-              };
+    const fetchData = async () => {
+      try {
+        const storedData = await loadData();
+        if (storedData) {
+            setData(storedData);
+             if (storedData.currentUser && storedData.users[storedData.currentUser]) {
+                const theme = storedData.users[storedData.currentUser].theme;
+                document.documentElement.classList.toggle('dark', theme === 'dark');
             }
-            return e;
-          });
         }
-        
-        // Ensure photoIds is an array
-        if (parsedData.events) {
-            parsedData.events = parsedData.events.map((e: AppEvent) => ({
-                ...e,
-                photoIds: e.photoIds || []
-            }));
-        }
-        // --- End Data Migration ---
-
-        // Ensure all keys from defaultState are present
-        const initialState = { ...defaultState, ...parsedData };
-        if (!initialState.photos) {
-            initialState.photos = [];
-        }
-
-        // Apply theme immediately if a user is stored
-        if (initialState.currentUser && initialState.users[initialState.currentUser]) {
-          const theme = initialState.users[initialState.currentUser].theme;
-          document.documentElement.classList.toggle('dark', theme === 'dark');
-        }
-
-        setData(initialState);
+      } catch (error) {
+        console.error("Failed to load data from server", error);
+      } finally {
+        setIsDataLoaded(true);
       }
-    } catch (error) {
-      console.error("Failed to load data from localStorage", error);
-    }
-    setIsDataLoaded(true);
+    };
+    fetchData();
   }, []);
 
-  // Effect to save debounced data to localStorage
   useEffect(() => {
     if (isDataLoaded) {
-      try {
-        // Don't save image data to localStorage to avoid size issues
-        const dataToStore = {
-          ...debouncedData,
-          photos: debouncedData.photos.map(({ id, date, description }) => ({ id, date, description, imageDataUrl: '' })),
-        };
-        localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(dataToStore));
-      } catch (error) {
-        console.error("Failed to save data to localStorage", error);
-      }
+      saveData(debouncedData);
     }
   }, [debouncedData, isDataLoaded]);
   
-  // Effect to handle theme changes without debouncing
   useEffect(() => {
     if(isDataLoaded && data.currentUser) {
         const theme = data.users[data.currentUser].theme;
@@ -146,7 +92,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const setTheme = (theme: 'light' | 'dark') => {
     if (data.currentUser) {
       setData(prev => {
-        // Immediately update the DOM for instant feedback
         document.documentElement.classList.toggle('dark', theme === 'dark');
         return {
           ...prev,

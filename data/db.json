@@ -1,0 +1,10 @@
+{
+  "currentUser": null,
+  "users": {
+    "lui": { "theme": "light" },
+    "lei": { "theme": "light" }
+  },
+  "events": [],
+  "photos": [],
+  "checkedDays": {}
+}
