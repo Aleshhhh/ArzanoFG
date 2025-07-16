@@ -1,8 +1,12 @@
 {
-  "currentUser": null,
+  "currentUser": "lui",
   "users": {
-    "lui": { "theme": "light" },
-    "lei": { "theme": "light" }
+    "lui": {
+      "theme": "light"
+    },
+    "lei": {
+      "theme": "light"
+    }
   },
   "events": [],
   "photos": [],

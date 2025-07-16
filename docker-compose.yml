@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: amore-eterno-app
     ports:
-      - "3000:3000"
+      - "1722:3000"
     volumes:
       - ./data:/app/data
     restart: unless-stopped
