@@ -1,9 +1,13 @@
+# Dockerfile
+
 # Fase 1: Installazione delle dipendenze
 FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Copia package.json e package-lock.json
-COPY package.json package-lock.json* ./
+COPY package.json ./
+# Invece di package-lock.json, npm e Next.js potrebbero usare yarn.lock o pnpm-lock.yaml. Adatta se necessario.
+# COPY package-lock.json ./ 
 
 # Installa le dipendenze
 RUN npm install
@@ -17,20 +21,20 @@ COPY . .
 # Esegui il build di Next.js
 RUN npm run build
 
-# Fase 3: Esecuzione
+# Fase 3: Immagine di produzione
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copia l'output del build dalla fase builder
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# Copia l'output standalone dalla fase di build
+COPY --from=builder /app/.next/standalone ./
+# Copia la cartella static da .next
+COPY --from=builder /app/.next/static ./.next/static
 
-# Espone la porta su cui l'app Next.js è in esecuzione
+
+# La porta di default esposta da Next.js è la 3000
 EXPOSE 3000
 
-# Avvia l'applicazione
-CMD ["npm", "start", "-p", "3000"]
+# Il comando per avviare l'applicazione
+CMD ["node", "server.js"]
