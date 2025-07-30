@@ -4,7 +4,7 @@ import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Arzano Foggia',
+  title: 'Amore Eterno',
   description: 'La nostra storia condivisa.',
 };
 

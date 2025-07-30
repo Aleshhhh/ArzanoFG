@@ -21,7 +21,7 @@ export function ProfileSelector() {
   };
 
   if (!isDataLoaded) {
-    return <div className="h-48"></div>;
+    return <div className="h-48 flex items-center justify-center"><div className="w-16 h-16 border-4 border-t-primary border-secondary rounded-full animate-spin"></div></div>;
   }
 
   return (

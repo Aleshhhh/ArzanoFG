@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [currentUser, isDataLoaded, router]);
   
   useEffect(() => {
-    if (currentUser && users) {
+    if (currentUser && users[currentUser]) {
       document.documentElement.classList.toggle('dark', users[currentUser].theme === 'dark');
     }
   }, [currentUser, users]);
@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const profileName = currentUser === 'lui' ? 'Aleh' : 'Angeh';
-  const profileInitial = 'A';
+  const profileInitial = currentUser === 'lui' ? 'A' : 'A';
 
   return (
     <div
@@ -69,8 +69,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     >
       <Sidebar open={open} setOpen={setOpen} collapsedWidth="90px" expandedWidth="300px">
         <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            {open ? <Logo /> : <LogoIcon />}
+          <div className="flex flex-1 flex-col overflow-x-hidden">
+            <div className="hidden md:block">
+              {open ? <Logo /> : <LogoIcon />}
+            </div>
             <div className="mt-8 flex flex-col gap-2">
               {navItems.map((item, idx) => (
                 <SidebarLink key={idx} link={{...item, href: item.href}} className={pathname === item.href ? "bg-secondary" : ""}/>
@@ -114,9 +116,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </SidebarBody>
       </Sidebar>
-      <main className="flex flex-1">
-         <div className="flex w-full flex-1 flex-col gap-2 p-4 sm:p-6 lg:p-8">
-            <div className="container mx-auto max-w-7xl">
+      <main className="flex-1 flex flex-col">
+         <div className="flex-1 p-4 sm:p-6 lg:p-8">
+            <div className="container mx-auto max-w-7xl h-full">
                 {children}
             </div>
          </div>

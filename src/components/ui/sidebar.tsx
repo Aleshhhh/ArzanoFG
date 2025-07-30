@@ -32,33 +32,6 @@ export const useSidebar = () => {
   return context;
 };
 
-export const SidebarProvider = ({
-  children,
-  open: openProp,
-  setOpen: setOpenProp,
-  animate = true,
-  collapsedWidth,
-  expandedWidth,
-}: {
-  children: React.ReactNode;
-  open?: boolean;
-  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  animate?: boolean;
-  collapsedWidth: string;
-  expandedWidth: string;
-}) => {
-  const [openState, setOpenState] = useState(false);
-
-  const open = openProp !== undefined ? openProp : openState;
-  const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
-
-  return (
-    <SidebarContext.Provider value={{ open, setOpen, animate, collapsedWidth, expandedWidth }}>
-      {children}
-    </SidebarContext.Provider>
-  );
-};
-
 export const Sidebar = ({
   children,
   open,
@@ -74,10 +47,15 @@ export const Sidebar = ({
   collapsedWidth?: string,
   expandedWidth?: string
 }) => {
+  const [openState, setOpenState] = useState(false);
+
+  const openToUse = open !== undefined ? open : openState;
+  const setOpenToUse = setOpen !== undefined ? setOpen : setOpenState;
+
   return (
-    <SidebarProvider open={open} setOpen={setOpen} animate={animate} collapsedWidth={collapsedWidth} expandedWidth={expandedWidth}>
+    <SidebarContext.Provider value={{ open: openToUse, setOpen: setOpenToUse, animate: animate ?? true, collapsedWidth, expandedWidth }}>
       {children}
-    </SidebarProvider>
+    </SidebarContext.Provider>
   );
 };
 
@@ -97,10 +75,9 @@ export const DesktopSidebar = ({
 }: React.ComponentProps<typeof motion.div>) => {
   const { open, setOpen, animate, collapsedWidth, expandedWidth } = useSidebar();
   return (
-    <>
-      <motion.div
+    <motion.div
         className={cn(
-          "h-screen px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0 rounded-r-lg sticky top-0",
+          "h-screen px-4 py-10 hidden md:flex md:flex-col bg-card/50 backdrop-blur-lg border-r border-border shrink-0 sticky top-0",
           className
         )}
         animate={{
@@ -112,7 +89,6 @@ export const DesktopSidebar = ({
       >
         {children}
       </motion.div>
-    </>
   );
 };
 
@@ -130,37 +106,49 @@ export const MobileSidebar = ({
         )}
         {...props}
       >
-        <div className="flex justify-start items-center w-12">
+        <div className="flex justify-start items-center">
             <LogoIcon />
         </div>
-        <div className="flex justify-end z-20">
+        <button className="p-2 rounded-md hover:bg-secondary" onClick={() => setOpen(!open)}>
           <Menu
             className="text-foreground"
-            onClick={() => setOpen(!open)}
           />
-        </div>
+        </button>
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
+              initial={{ y: "-100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "-100%", opacity: 0 }}
               transition={{
                 duration: 0.3,
                 ease: "easeInOut",
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-background p-10 z-[100] flex flex-col justify-between overflow-y-auto",
+                "fixed top-0 left-0 w-full bg-card/80 backdrop-blur-lg z-[100] border-b",
+                "flex flex-col",
                 className
               )}
             >
-              <div
-                className="absolute right-10 top-10 z-50 text-foreground"
-                onClick={() => setOpen(!open)}
-              >
-                <X />
-              </div>
-              {children}
+                <div className="flex justify-between items-center p-4">
+                    <LogoIcon />
+                    <button className="p-2 rounded-md hover:bg-secondary" onClick={() => setOpen(false)}>
+                        <X className="text-foreground" />
+                    </button>
+                </div>
+                <div className="p-4 flex flex-col">
+                 {React.Children.map(children, (child) => {
+                    if (React.isValidElement(child)) {
+                      return React.cloneElement(child as React.ReactElement<any>, {
+                        className: cn(
+                          (child.props.className || ''),
+                          'flex flex-col gap-4'
+                        )
+                      });
+                    }
+                    return child;
+                  })}
+                </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -245,7 +233,7 @@ export const Logo = () => {
             transition={{ duration: 0.2, delay: 0.1}}
             className="font-headline font-medium text-foreground dark:text-white whitespace-pre text-lg"
           >
-            Arzano Foggia
+            Amore Eterno
           </motion.span>
         )}
       </AnimatePresence>
@@ -257,7 +245,7 @@ export const LogoIcon = () => {
   return (
     <Link
       href="/dashboard"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20 w-12"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
     >
       <div className="h-5 w-6 bg-primary dark:bg-primary rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
     </Link>
