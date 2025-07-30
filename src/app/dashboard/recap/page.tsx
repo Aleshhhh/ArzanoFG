@@ -106,7 +106,7 @@ export default function RecapPage() {
                             options={months} 
                             optionLabel="name" 
                             placeholder="Mese" 
-                            className="w-full h-10 flex items-center border-2 border-input bg-background rounded-md text-sm"
+                            className="w-full h-10 flex items-center border-2 border-input bg-background rounded-md text-sm font-bold"
                             panelClassName="bg-background text-foreground border-2 border-input rounded-md"
                             checkmark={true} 
                             highlightOnSelect={false} />
