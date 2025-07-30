@@ -242,7 +242,7 @@ export default function CalendarPage() {
 
   return (
     <>
-      <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1.5fr]">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,_1fr)_1.5fr] gap-8">
         <div className="flex flex-col gap-8">
             <Card className="bg-card/50 backdrop-blur-lg">
                 <CardHeader>
@@ -448,11 +448,3 @@ export default function CalendarPage() {
     </>
   );
 }
-
-    
-
-    
-
-    
-
-
