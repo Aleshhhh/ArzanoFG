@@ -1,3 +1,4 @@
+
 'use client';
 
 import { MotionValue, motion, useSpring, useTransform } from "framer-motion";
@@ -59,21 +60,22 @@ function Digit({ place, value, height }: DigitProps) {
 interface CounterProps {
   value: number;
   className?: string;
+  fontSize?: number;
 }
 
 export default function Counter({
   value,
-  className
+  className,
+  fontSize = 20,
 }: CounterProps) {
   const places = [1000, 100, 10, 1];
-  const fontSize = 20; // Corrisponde circa a text-xl
   const padding = 8;
   const height = fontSize + padding;
 
   return (
     <div className={cn("relative inline-block", className)}>
       <div
-        className="flex overflow-hidden rounded-md text-xl font-bold leading-none text-foreground"
+        className="flex overflow-hidden rounded-md font-bold leading-none text-foreground"
         style={{ fontSize: `${fontSize}px`, gap: '2px' }}
       >
         {places.map((place) => (

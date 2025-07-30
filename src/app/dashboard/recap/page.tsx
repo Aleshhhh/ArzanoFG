@@ -99,7 +99,7 @@ export default function RecapPage() {
                     <div className="space-y-2">
                         <Label htmlFor="month">Mese</Label>
                          <Select value={formData.month} onValueChange={handleSelectChange}>
-                            <SelectTrigger>
+                            <SelectTrigger className="font-bold">
                                 <SelectValue placeholder="Mese" />
                             </SelectTrigger>
                             <SelectContent>
@@ -109,8 +109,8 @@ export default function RecapPage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="year">Anno</Label>
-                        <div className="flex items-center justify-between rounded-md border-2 border-input bg-background px-3 py-1.5 text-sm ring-offset-background">
-                            <Counter value={formData.year} />
+                        <div className="flex h-10 items-center justify-between rounded-md border-2 border-input bg-background px-3 text-sm ring-offset-background">
+                            <Counter value={formData.year} fontSize={16} />
                              <div className="flex items-center">
                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleYearChange(-1)}>
                                     <ChevronLeft className="h-4 w-4"/>
