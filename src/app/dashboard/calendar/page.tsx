@@ -242,40 +242,42 @@ export default function CalendarPage() {
 
   return (
     <>
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[2fr_3fr]">
-        <Card className="bg-card/50 backdrop-blur-lg">
-          <CardHeader>
-            <CardTitle className="font-headline text-3xl">Il Nostro Calendario</CardTitle>
-            <CardDescription>Seleziona un giorno per vedere i tuoi ricordi.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-md"
-              locale={it}
-              modifiers={{ event: eventDays }}
-              modifiersStyles={{
-                  event: {
-                      border: "2px solid hsl(var(--primary))",
-                      backgroundColor: "hsl(var(--primary) / 0.8)",
-                      color: "hsl(var(--foreground))"
-                  }
-              }}
-            />
-          </CardContent>
-        </Card>
+      <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1.5fr]">
+        <div className="flex flex-col gap-8">
+            <Card className="bg-card/50 backdrop-blur-lg">
+                <CardHeader>
+                    <CardTitle className="font-headline text-3xl">Il Nostro Calendario</CardTitle>
+                    <CardDescription>Seleziona un giorno per vedere i tuoi ricordi.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                    <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    className="rounded-md"
+                    locale={it}
+                    modifiers={{ event: eventDays }}
+                    modifiersStyles={{
+                        event: {
+                            border: "2px solid hsl(var(--primary))",
+                            backgroundColor: "hsl(var(--primary) / 0.8)",
+                            color: "hsl(var(--foreground))"
+                        }
+                    }}
+                    />
+                </CardContent>
+            </Card>
+        </div>
 
-        <div className="space-y-4 lg:col-span-2 xl:col-span-1">
-          <Card className="lg:col-span-1 bg-card/50 backdrop-blur-lg">
+        <div className="space-y-4">
+          <Card className="bg-card/50 backdrop-blur-lg">
             <CardHeader>
               <CardTitle className="font-headline text-2xl capitalize">
                 {filterTitles[filterMode]}
               </CardTitle>
               <CardDescription>
                 <Tabs value={filterMode} onValueChange={(value) => setFilterMode(value as FilterMode)} className="w-full mt-2">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                     <TabsTrigger value="day">Giorno</TabsTrigger>
                     <TabsTrigger value="month">Mese</TabsTrigger>
                     <TabsTrigger value="year">Anno</TabsTrigger>
@@ -286,7 +288,7 @@ export default function CalendarPage() {
             </CardHeader>
           </Card>
           
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
               {filteredEvents.length > 0 ? (
                 filteredEvents.map((event) => {
                   const eventPhoto = event.photoIds.length > 0 ? photos.find(p => p.id === event.photoIds[0]) : null;
@@ -452,4 +454,5 @@ export default function CalendarPage() {
     
 
     
+
 
