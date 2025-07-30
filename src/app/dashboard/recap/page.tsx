@@ -6,17 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppContext } from '@/context/AppContext';
 import { generateMonthlyRecap, GenerateMonthlyRecapInput } from '@/ai/flows/generate-monthly-recap';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import Counter from '@/components/ui/counter';
 
 const months = Array.from({ length: 12 }, (_, i) => {
-    const monthName = format(new Date(0, i), 'MMMM', { locale: it });
+    const d = new Date(2024, i);
+    const monthName = format(d, 'MMMM', { locale: it });
     return {
         value: (i + 1).toString(),
         label: monthName.charAt(0).toUpperCase() + monthName.slice(1)
@@ -30,7 +31,7 @@ export default function RecapPage() {
   const [recap, setRecap] = useState('');
   const [formData, setFormData] = useState({
     month: (new Date().getMonth() + 1).toString(),
-    year: new Date().getFullYear().toString(),
+    year: new Date().getFullYear(),
     notes: '',
   });
 
@@ -43,6 +44,10 @@ export default function RecapPage() {
     setFormData(prev => ({ ...prev, month: value }));
   }
 
+  const handleYearChange = (amount: number) => {
+    setFormData(prev => ({ ...prev, year: prev.year + amount }));
+  };
+
   const handleGenerateRecap = async () => {
     if (!formData.month || !formData.year) {
       toast({ title: 'Per favore seleziona un mese e un anno', variant: 'destructive' });
@@ -54,7 +59,7 @@ export default function RecapPage() {
 
     try {
         const targetMonth = parseInt(formData.month, 10) -1;
-        const targetYear = parseInt(formData.year, 10);
+        const targetYear = formData.year;
 
         const relevantPhotos = photos
             .filter(p => {
@@ -65,7 +70,7 @@ export default function RecapPage() {
       
         const input: GenerateMonthlyRecapInput = {
             month: months.find(m => m.value === formData.month)?.label || '',
-            year: formData.year,
+            year: formData.year.toString(),
             notes: formData.notes,
             photos: relevantPhotos,
         };
@@ -104,7 +109,15 @@ export default function RecapPage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="year">Anno</Label>
-                        <Input id="year" name="year" type="number" value={formData.year} onChange={handleInputChange} />
+                        <div className="flex items-center justify-between rounded-md border-2 border-input bg-background px-3 py-1.5 text-sm ring-offset-background">
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleYearChange(-1)}>
+                                <ChevronLeft className="h-4 w-4"/>
+                            </Button>
+                            <Counter value={formData.year} />
+                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleYearChange(1)}>
+                                <ChevronRight className="h-4 w-4"/>
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 <div className="space-y-2">
