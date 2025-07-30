@@ -260,8 +260,6 @@ export default function CalendarPage() {
                     modifiersStyles={{
                         event: {
                             border: "2px solid hsl(var(--primary))",
-                            backgroundColor: "hsl(var(--primary) / 0.8)",
-                            color: "hsl(var(--foreground))"
                         }
                     }}
                     />

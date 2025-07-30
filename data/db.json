@@ -8,7 +8,17 @@
       "theme": "light"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "2025-07-30T10:41:36.458Z",
+      "startDate": "2025-07-22T22:00:00.000Z",
+      "endDate": "2025-07-29T22:00:00.000Z",
+      "title": "ddasda",
+      "description": "",
+      "tags": [],
+      "photoIds": []
+    }
+  ],
   "photos": [],
   "checkedDays": {}
 }
