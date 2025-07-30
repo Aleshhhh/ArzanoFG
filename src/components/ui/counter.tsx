@@ -76,7 +76,7 @@ export default function Counter({
     <div className={cn("relative inline-block", className)}>
       <div
         className="flex overflow-hidden rounded-md font-bold leading-none text-foreground"
-        style={{ fontSize: `${fontSize}px`, gap: '2px' }}
+        style={{ fontSize: `${fontSize}px`, gap: '0px' }}
       >
         {places.map((place) => (
           <Digit
