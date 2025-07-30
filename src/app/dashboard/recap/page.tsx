@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppContext } from '@/context/AppContext';
 import { generateMonthlyRecap, GenerateMonthlyRecapInput } from '@/ai/flows/generate-monthly-recap';
 import { useToast } from '@/hooks/use-toast';
@@ -14,13 +13,14 @@ import { Sparkles, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import Counter from '@/components/ui/counter';
+import { Dropdown } from 'primereact/dropdown';
 
 const months = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(2024, i);
     const monthName = format(d, 'MMMM', { locale: it });
     return {
-        value: (i + 1).toString(),
-        label: monthName.charAt(0).toUpperCase() + monthName.slice(1)
+        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+        code: (i + 1).toString()
     };
 });
 
@@ -69,7 +69,7 @@ export default function RecapPage() {
             .map(p => p.imageDataUrl);
       
         const input: GenerateMonthlyRecapInput = {
-            month: months.find(m => m.value === formData.month)?.label || '',
+            month: months.find(m => m.code === formData.month)?.name || '',
             year: formData.year.toString(),
             notes: formData.notes,
             photos: relevantPhotos,
@@ -85,6 +85,8 @@ export default function RecapPage() {
       setIsLoading(false);
     }
   };
+  
+  const selectedMonthObject = months.find(m => m.code === formData.month) || null;
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
@@ -98,14 +100,16 @@ export default function RecapPage() {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="month">Mese</Label>
-                         <Select value={formData.month} onValueChange={handleSelectChange}>
-                            <SelectTrigger className="font-bold">
-                                <SelectValue placeholder="Mese" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
+                         <Dropdown 
+                            value={selectedMonthObject} 
+                            onChange={(e) => handleSelectChange(e.value.code)} 
+                            options={months} 
+                            optionLabel="name" 
+                            placeholder="Mese" 
+                            className="w-full h-10 flex items-center border-2 border-input bg-background rounded-md text-sm"
+                            panelClassName="bg-background text-foreground border-2 border-input rounded-md"
+                            checkmark={true} 
+                            highlightOnSelect={false} />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="year">Anno</Label>
