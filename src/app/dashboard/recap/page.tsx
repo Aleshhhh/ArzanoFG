@@ -110,13 +110,15 @@ export default function RecapPage() {
                      <div className="space-y-2">
                         <Label htmlFor="year">Anno</Label>
                         <div className="flex items-center justify-between rounded-md border-2 border-input bg-background px-3 py-1.5 text-sm ring-offset-background">
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleYearChange(-1)}>
-                                <ChevronLeft className="h-4 w-4"/>
-                            </Button>
                             <Counter value={formData.year} />
-                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleYearChange(1)}>
-                                <ChevronRight className="h-4 w-4"/>
-                            </Button>
+                             <div className="flex items-center">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleYearChange(-1)}>
+                                    <ChevronLeft className="h-4 w-4"/>
+                                </Button>
+                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleYearChange(1)}>
+                                    <ChevronRight className="h-4 w-4"/>
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
