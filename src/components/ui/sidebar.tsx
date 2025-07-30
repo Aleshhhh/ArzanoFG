@@ -234,7 +234,7 @@ export const Logo = () => {
             transition={{ duration: 0.2, delay: 0.1}}
             className="font-headline font-medium text-foreground dark:text-white whitespace-pre text-lg"
           >
-            Amore Eterno
+            Arzano Foggia
           </motion.span>
         )}
       </AnimatePresence>

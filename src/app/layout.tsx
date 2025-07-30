@@ -6,7 +6,7 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primeicons/primeicons.css";
 
 export const metadata: Metadata = {
-  title: 'Amore Eterno',
+  title: 'Arzano Foggia',
   description: 'La nostra storia condivisa.',
 };
 

@@ -8,7 +8,7 @@ export default function Home() {
         <div className="inline-flex items-center justify-center mb-4">
            <Heart className="text-primary w-12 h-12 mr-4" />
            <h1 className="font-headline text-5xl md:text-7xl font-bold text-primary">
-            Amore Eterno
+            Arzano Foggia
            </h1>
            <Heart className="text-primary w-12 h-12 ml-4" />
         </div>
