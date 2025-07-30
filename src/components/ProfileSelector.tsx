@@ -25,7 +25,7 @@ export function ProfileSelector() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
+    <div className="flex flex-col items-center md:flex-row gap-8">
       {profiles.map((profile) => (
         <div key={profile.id} onClick={() => handleSelectProfile(profile.id as 'lui' | 'lei')} className="cursor-pointer group">
           <Card className="w-64 h-72 pt-6 bg-card/30 backdrop-blur-lg border-2 border-transparent group-hover:border-primary transition-all duration-300 transform group-hover:scale-105 shadow-lg">
