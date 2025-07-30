@@ -15,10 +15,13 @@ import { Sparkles, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-const months = Array.from({ length: 12 }, (_, i) => ({
-    value: (i + 1).toString(),
-    label: format(new Date(0, i), 'MMMM', { locale: it })
-}));
+const months = Array.from({ length: 12 }, (_, i) => {
+    const monthName = format(new Date(0, i), 'MMMM', { locale: it });
+    return {
+        value: (i + 1).toString(),
+        label: monthName.charAt(0).toUpperCase() + monthName.slice(1)
+    };
+});
 
 export default function RecapPage() {
   const { photos } = useAppContext();
@@ -95,7 +98,7 @@ export default function RecapPage() {
                                 <SelectValue placeholder="Mese" />
                             </SelectTrigger>
                             <SelectContent>
-                                {months.map(m => <SelectItem key={m.value} value={m.value} className="capitalize">{m.label}</SelectItem>)}
+                                {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
