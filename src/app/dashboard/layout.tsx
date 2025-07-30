@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div
-      className="mx-auto flex w-full flex-1 flex-col overflow-hidden md:flex-row h-screen"
+      className="mx-auto flex w-full flex-1 flex-col md:flex-row min-h-screen"
     >
       <Sidebar open={open} setOpen={setOpen} collapsedWidth="90px" expandedWidth="300px">
         <SidebarBody className="justify-between gap-10">
@@ -114,9 +114,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </SidebarBody>
       </Sidebar>
-      <main className="flex flex-1 h-full">
-         <div className="flex h-full w-full flex-1 flex-col gap-2 p-4 sm:p-6 lg:p-8">
-            <div className="container mx-auto max-w-7xl h-full">
+      <main className="flex flex-1">
+         <div className="flex w-full flex-1 flex-col gap-2 p-4 sm:p-6 lg:p-8">
+            <div className="container mx-auto max-w-7xl">
                 {children}
             </div>
          </div>
