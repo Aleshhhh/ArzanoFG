@@ -64,7 +64,7 @@ export default function CalendarPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EditingEventState | null>(null);
-  const [filterMode, setFilterMode] = useState<FilterMode>('day');
+  const [filterMode, setFilterMode] = useState<FilterMode>('all');
   
   const filteredEvents = useMemo(() => {
     if (!selectedDate) return [];
